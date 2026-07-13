@@ -254,7 +254,16 @@
 
   <div class="field">
     <label for="topic">Meeting Topic <span class="hint" style="display:inline; margin:0;">(the corporate-sounding cover story)</span></label>
-    <input type="text" id="topic" placeholder="e.g. Q3 Culture &amp; Alignment Sync">
+    <select id="topic" required>
+      <option value="" selected disabled>Select meeting topic</option>
+      <option value="Q3 Planning Sync">Q3 Planning Sync</option>
+      <option value="Budgeting Discussion">Budgeting Discussion</option>
+      <option value="Culture &amp; Alignment Check-in">Culture &amp; Alignment Check-in</option>
+      <option value="Cross-Team Strategy Review">Cross-Team Strategy Review</option>
+      <option value="H2 Priorities Catch-up">H2 Priorities Catch-up</option>
+      <option value="__custom__">(write your own)</option>
+    </select>
+    <input type="text" id="topicCustom" placeholder="Write your own meeting topic" style="display:none; margin-top:10px;">
   </div>
 
   <div class="field">
@@ -343,6 +352,20 @@
   }
   const venueInput = document.getElementById('venue');
   const venueMapLink = document.getElementById('venueMapLink');
+  const topicInput = document.getElementById('topic');
+  const topicCustomInput = document.getElementById('topicCustom');
+
+  function syncTopicInput(){
+    const useCustomTopic = topicInput.value === '__custom__';
+    topicCustomInput.style.display = useCustomTopic ? 'block' : 'none';
+    topicCustomInput.required = useCustomTopic;
+    if(!useCustomTopic){
+      topicCustomInput.value = '';
+    }
+  }
+  topicInput.addEventListener('change', syncTopicInput);
+  syncTopicInput();
+
   function syncVenueMapLink(){
     const v = venueInput.value.trim();
     if(v){
@@ -377,11 +400,24 @@
   document.getElementById('addEventBtn').addEventListener('click', function(){
     const bossName = document.getElementById('bossName').value.trim() || 'there';
     const bossEmail = document.getElementById('bossEmail').value.trim();
-    const topic = document.getElementById('topic').value.trim() || 'Team Sync';
+    const selectedTopic = topicInput.value;
+    const topic = selectedTopic === '__custom__' ? topicCustomInput.value.trim() : selectedTopic;
     const venue = document.getElementById('venue').value;
     const note = document.getElementById('note').value.trim();
     const start = new Date(startInput.value);
     const end = new Date(endInput.value);
+
+    if(!selectedTopic){
+      setStatus('Please select a meeting topic before creating the event.');
+      topicInput.focus();
+      return;
+    }
+
+    if(selectedTopic === '__custom__' && !topic){
+      setStatus('Please write your custom meeting topic.');
+      topicCustomInput.focus();
+      return;
+    }
 
     if(!venue){
       setStatus('Please select a venue before creating the event.');
