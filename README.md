@@ -11,6 +11,29 @@ This repo contains a single-file static microsite for the BYOB campaign.
 
 There is no backend, build step, or package manager. The site is deployed by copying the HTML file directly to the server.
 
+## Current App Behavior
+
+- Single-page static microsite with inline CSS/JS in `byob-boss-invite.html`.
+- Mobile-first responsive form layout (single column on small screens, two columns on larger screens).
+- Required dropdowns for:
+	- Meeting Topic (`#topic`) with preset options and a custom fallback field (`#topicCustom`).
+	- Venue (`#venue`) with fixed bar options.
+- Optional fields:
+	- Boss Name (`#bossName`) defaults to `there`.
+	- Boss Email (`#bossEmail`) controls whether attendees are auto-attached.
+	- Pre-template Event Details (`#note`) appends a final extra paragraph.
+- Calendar options:
+	- Google Calendar
+	- Outlook.com (personal)
+	- Outlook (work/school)
+	- Desktop App (`.ics` download)
+- Tracking attendee rule:
+	- `hkbeerco@proton.me` is only added when Boss Email is present.
+- Invite body formatting:
+	- Paragraph-based template with blank lines.
+	- Plain text body used for Google/ICS.
+	- HTML `<br><br>` body used for Outlook deep links.
+
 ## Repo Structure
 
 ```text
@@ -101,3 +124,18 @@ That file covers:
 - The deploy script reads local config from `.env.deploy` by default.
 - The script supports `REMOTE_CHMOD`, defaulting to `644`.
 - If deploys start failing, check `SSH_KEY` first. It must reference the private key file, not `id_rsa.pub`.
+
+## Manual Smoke Test
+
+1. Select each calendar type and confirm the expected destination opens.
+2. Validate topic flow:
+	- Preset topic selected.
+	- `(write your own)` selected and custom value required.
+3. Validate guest flow:
+	- Without Boss Email: no attendees auto-added.
+	- With Boss Email: boss + `hkbeerco@proton.me` auto-added.
+4. Validate venue flow:
+	- Venue is required.
+	- Map link appears after venue selection.
+5. Validate `.ics` file content:
+	- Includes boss attendee and HK Beer attendee only when boss email exists.
