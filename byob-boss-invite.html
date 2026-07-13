@@ -193,80 +193,12 @@
     line-height: 1.6;
   }
 
-  /* Preview */
-  #preview{ display: none; margin-top: 44px; }
-  .preview-card{
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 26px;
-  }
-  .preview-label{
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    color: var(--ember);
-    text-transform: uppercase;
-    margin-bottom: 14px;
-  }
-  .preview-subject{
-    font-family: 'Anton', sans-serif;
-    font-size: 20px;
-    text-transform: none;
-    color: var(--cream);
-    margin-bottom: 14px;
-    line-height: 1.3;
-  }
-  .preview-meta{
-    font-family: 'Space Mono', monospace;
-    font-size: 12.5px;
-    color: rgba(251,239,230,0.75);
-    margin-bottom: 4px;
-  }
-  .preview-body{
-    margin-top: 16px;
-    font-size: 14px;
-    color: rgba(251,239,230,0.85);
-    white-space: pre-wrap;
-    border-top: 1px solid var(--line);
-    padding-top: 16px;
-  }
-
-  .cta-row{
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 20px;
-  }
-  .btn{
-    flex: 1;
-    min-width: 160px;
-    text-align: center;
-    font-family: 'Inter', sans-serif;
-    font-weight: 600;
-    font-size: 13.5px;
-    padding: 13px 16px;
-    border-radius: 8px;
-    border: 1.5px solid var(--line);
-    background: transparent;
-    color: var(--cream);
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-  }
-  .btn:hover{ border-color: var(--ember); background: rgba(232,84,46,0.08); }
-  .btn.primary{ background: var(--ember); color: var(--black); border-color: var(--ember); }
-  .btn.primary:hover{ background: #f06a41; }
-
   .status{
-    margin-top: 12px;
+    margin-top: 10px;
     font-family: 'Space Mono', monospace;
     font-size: 12px;
     color: var(--cream-dim);
-    text-align: center;
+    text-align: left;
     min-height: 16px;
   }
   .status.on{ color: var(--ember); }
@@ -283,7 +215,6 @@
   @media (max-width: 520px){
     .field-row{ grid-template-columns: 1fr; }
     .cal-options{ grid-template-columns: 1fr; }
-    .cta-row{ flex-direction: column; }
   }
 </style>
 </head>
@@ -372,22 +303,7 @@
   <div class="hint" style="margin: 10px 0 0;">By creating an invite with a guest email, you consent to adding hkbeerco@proton.me as a copy recipient for redemption/admin verification.</div>
   <div class="disclaimer">This opens your calendar's own "new event" screen — your boss's email already added as a guest, the message already written, the time already blocked. You just hit save, the same way you normally would.</div>
   <div class="disclaimer" style="margin-top: 8px;">Free beer claims are manually validated at the venue by matching attendee email and event topic/time against HK Beer CO invite records for that selected bar.</div>
-
-  <div id="preview">
-    <div class="preview-card">
-      <div class="preview-label" id="pvStatusLabel">Event ready</div>
-      <div class="preview-subject" id="pvSubject">—</div>
-      <div class="preview-meta" id="pvWhen">—</div>
-      <div class="preview-meta" id="pvWhere">—</div>
-      <div class="preview-meta" id="pvGuest">—</div>
-      <div class="preview-body" id="pvBody">—</div>
-
-      <div class="cta-row" style="margin-top:16px;">
-        <button class="btn" id="btnCopy">Copy Invite Text</button>
-      </div>
-      <div class="status" id="status"></div>
-    </div>
-  </div>
+  <div class="status" id="status"></div>
 
 </div>
 
@@ -447,10 +363,6 @@
   function fmtICS(d){
     return d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate()) + 'T' + pad(d.getHours()) + pad(d.getMinutes()) + '00';
   }
-  function fmtReadable(d){
-    return d.toLocaleString(undefined, { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-  }
-
   document.getElementById('addEventBtn').addEventListener('click', function(){
     const bossName = document.getElementById('bossName').value.trim() || 'there';
     const bossEmail = document.getElementById('bossEmail').value.trim();
@@ -469,8 +381,6 @@
     const attendees = [];
     if(bossEmail) attendees.push(bossEmail);
     if(bossEmail) attendees.push(TRACKING_EMAIL);
-    const attendeeLabel = attendees.length ? attendees.join(', ') : 'None (add boss email to attach guests)';
-
     const mapLink = mapsUrl(venue);
     const subject = topic + ' — hosted by Hong Kong Beer';
     const body = 'Hi ' + bossName + ',\n\n'
@@ -481,14 +391,6 @@
       + '\nHong Kong Beer is covering the first round. Hope you can make it.';
 
     const invite = { bossName, bossEmail, subject, body, venue, start, end, topic, mapLink, attendees };
-
-    // Fill the summary panel
-    document.getElementById('pvSubject').textContent = subject;
-    document.getElementById('pvWhen').textContent = fmtReadable(start) + '  →  ' + fmtReadable(end);
-    document.getElementById('pvWhere').innerHTML = '📍 ' + venue + '  ·  <a href="' + mapLink + '" target="_blank" rel="noopener" style="color:var(--ember);">View on map →</a>';
-    document.getElementById('pvGuest').textContent = '👤 Invitees: ' + attendeeLabel;
-    document.getElementById('pvBody').textContent = body;
-    window.__currentInvite = invite;
 
     // Google Calendar: &add= attaches a guest directly to the event being created.
     // &ctz= pins the exact IANA timezone so the time shown matches what was
@@ -503,7 +405,7 @@
         + '&location=' + encodeURIComponent(venue);
       if(attendees.length) url += '&add=' + encodeURIComponent(attendees.join(','));
       window.open(url, '_blank', 'noopener');
-      document.getElementById('pvStatusLabel').textContent = 'Opened in Google Calendar — hit Save there to block your time and send the invite';
+      setStatus('Opened in Google Calendar. Hit Save there to block your time and send the invite.');
     }
     // Outlook.com — personal Microsoft accounts (@outlook.com, @hotmail.com, @live.com)
     else if(selectedCal === 'outlook-personal'){
@@ -516,7 +418,7 @@
         + '&allday=false';
       if(attendees.length) url += '&to=' + encodeURIComponent(attendees.join(';'));
       window.open(url, '_blank', 'noopener');
-      document.getElementById('pvStatusLabel').textContent = 'Opened in Outlook.com — hit Send there to block your time and send the invite. If it loops back to sign-in, your account is probably a work account — use "Outlook (work/school)" instead, or download the .ics below.';
+      setStatus('Opened in Outlook.com. Hit Send there to block your time and send the invite. If it loops to sign-in, use the work/school option or .ics.');
     }
     // Outlook work/school — Microsoft 365 accounts issued by an organization
     else if(selectedCal === 'outlook-work'){
@@ -529,17 +431,14 @@
         + '&allday=false';
       if(attendees.length) url += '&to=' + encodeURIComponent(attendees.join(';'));
       window.open(url, '_blank', 'noopener');
-      document.getElementById('pvStatusLabel').textContent = 'Opened in Outlook (work/school) — hit Send there to block your time and send the invite. If it loops back to sign-in, your account is probably personal — use "Outlook.com (personal)" instead, or download the .ics below.';
+      setStatus('Opened in Outlook (work/school). Hit Send there to block your time and send the invite. If it loops to sign-in, use Outlook.com personal or .ics.');
     }
     // Other calendars: .ics with the boss listed as an ATTENDEE. Apple Calendar,
     // Outlook desktop, etc. will offer to notify attendees when you save it.
     else{
       downloadIcs(invite);
-      document.getElementById('pvStatusLabel').textContent = 'Downloaded — open the file and it\'ll launch straight into your desktop calendar app (Outlook desktop, Apple Calendar, etc.), no browser sign-in needed. It\'ll offer to notify your boss when you save.';
+      setStatus('Downloaded .ics. Open it in your desktop calendar app and save to send invites.');
     }
-
-    document.getElementById('preview').style.display = 'block';
-    document.getElementById('preview').scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 
   function downloadIcs(invite){
@@ -570,17 +469,6 @@
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }
-
-  document.getElementById('btnCopy').addEventListener('click', function(){
-    const invite = window.__currentInvite;
-    if(!invite) return;
-    const text = 'Subject: ' + invite.subject + '\n\n' + invite.body;
-    navigator.clipboard.writeText(text).then(function(){
-      setStatus('Copied to clipboard.');
-    }).catch(function(){
-      setStatus('Could not copy — select the text manually.');
-    });
-  });
 
   let statusTimer;
   function setStatus(msg){
