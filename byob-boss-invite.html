@@ -394,14 +394,26 @@
     if(bossEmail) attendees.push(TRACKING_EMAIL);
     const mapLink = mapsUrl(venue);
     const subject = topic + ' — hosted by Hong Kong Beer';
-    const body = 'Hi ' + bossName + ',\n\n'
-      + 'Quick heads up: "' + topic + '" is happening in person this time — at ' + venue + ', not the usual room.\n'
-      + 'Map: ' + mapLink + '\n\n'
-      + 'It lines up with the World Cup final, so the actual agenda is: watch the match, have a beer, talk about literally anything other than the roadmap.\n'
-      + (note ? '\n' + note + '\n' : '')
-      + '\nHong Kong Beer is covering the first round. Hope you can make it.';
+    const bodyParagraphs = [
+      'Generated Invite Copy Template',
+      'Hi ' + bossName,
+      'Hope this email finds you well. I\'d like to discuss ' + topic + ' out of the office at ' + venue + ' at 3am. It just so happens to be the World Cup Final. What a coincidence, am I right?',
+      'We can talk about how we\'re moving forward on ' + topic + '.',
+      'We probably won\'t. But we can.',
+      'Oh by the way, because you\'re coming with me, we\'ll both get a free Hong Kong Beer.',
+      'Food for thought.',
+      'HK Beer: Show this invite at the bar to claim your free beer.',
+      'See you then.'
+    ];
 
-    const invite = { bossName, bossEmail, subject, body, venue, start, end, topic, mapLink, attendees };
+    if(note){
+      bodyParagraphs.push(note);
+    }
+
+    const bodyText = bodyParagraphs.join('\r\n\r\n');
+    const bodyOutlook = bodyParagraphs.join('<br><br>');
+
+    const invite = { bossName, bossEmail, subject, body: bodyText, venue, start, end, topic, mapLink, attendees };
 
     // Google Calendar: &add= attaches a guest directly to the event being created.
     // &ctz= pins the exact IANA timezone so the time shown matches what was
@@ -412,7 +424,7 @@
         + '&text=' + encodeURIComponent(subject)
         + '&dates=' + fmtGoogle(start) + '/' + fmtGoogle(end)
         + '&ctz=' + encodeURIComponent(tz)
-        + '&details=' + encodeURIComponent(body)
+        + '&details=' + encodeURIComponent(bodyText)
         + '&location=' + encodeURIComponent(venue);
       if(attendees.length) url += '&add=' + encodeURIComponent(attendees.join(','));
       window.open(url, '_blank', 'noopener');
@@ -424,7 +436,7 @@
         + '&subject=' + encodeURIComponent(subject)
         + '&startdt=' + encodeURIComponent(fmtISO(start))
         + '&enddt=' + encodeURIComponent(fmtISO(end))
-        + '&body=' + encodeURIComponent(body)
+        + '&body=' + encodeURIComponent(bodyOutlook)
         + '&location=' + encodeURIComponent(venue)
         + '&allday=false';
       if(attendees.length) url += '&to=' + encodeURIComponent(attendees.join(';'));
@@ -437,7 +449,7 @@
         + '&subject=' + encodeURIComponent(subject)
         + '&startdt=' + encodeURIComponent(fmtISO(start))
         + '&enddt=' + encodeURIComponent(fmtISO(end))
-        + '&body=' + encodeURIComponent(body)
+        + '&body=' + encodeURIComponent(bodyOutlook)
         + '&location=' + encodeURIComponent(venue)
         + '&allday=false';
       if(attendees.length) url += '&to=' + encodeURIComponent(attendees.join(';'));
