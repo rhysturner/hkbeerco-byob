@@ -17,7 +17,8 @@ There is no backend, build step, or package manager. The site is deployed by cop
 byob-boss-invite.html   Main microsite
 deploy-scp.sh           SCP deploy script
 .env.deploy.example     Template for local deploy config
-README.md               Operational notes
+ops/server-notes.md     Live server and auth notes
+README.md               Project overview and deploy guide
 AGENTS.md               Project-specific implementation notes
 ```
 
@@ -83,109 +84,20 @@ If your server uses a custom SSH port or private key:
 scp -P 2222 -i ~/.ssh/your-key byob-boss-invite.html user@example.com:/var/www/html/index.html
 ```
 
-## Current Live Server Details
+## Operations
 
-Current live deployment target:
+Live server details, Nginx auth notes, and troubleshooting steps are in [ops/server-notes.md](/Users/rhysturner/Development/Publicis/hk-beer-co/ops/server-notes.md).
 
-- Host: `brrrr.app`
-- Server IP: `139.59.109.77`
-- Web root for this microsite: `/var/www/brrrr.app/html/hkbeerco/byob`
-- Live file: `/var/www/brrrr.app/html/hkbeerco/byob/index.html`
-- Public URL: `https://brrrr.app/hkbeerco/byob/`
+That file covers:
 
-The main site root in Nginx is:
-
-```text
-/var/www/brrrr.app/html
-```
-
-## Basic Auth
-
-The site-wide basic auth for `brrrr.app` is configured in:
-
-- `/etc/nginx/sites-available/brrrr.app`
-- `/etc/nginx/sites-enabled/brrrr.app`
-
-The actual password file is:
-
-- `/etc/nginx/.htpasswd_brrrr`
-
-Relevant directives in the Nginx config:
-
-```nginx
-auth_basic "Restricted";
-auth_basic_user_file /etc/nginx/.htpasswd_brrrr;
-```
-
-The BYOB microsite is currently public because this location exception was added:
-
-```nginx
-location ^~ /hkbeerco/byob/ {
-	auth_basic off;
-}
-```
-
-That means:
-
-- Most of `brrrr.app` is still protected by basic auth.
-- `https://brrrr.app/hkbeerco/byob/` is publicly accessible.
-
-### How to update the basic auth credentials
-
-If you want to change the username/password in future, update the htpasswd file on the server.
-
-Interactive update:
-
-```sh
-sudo htpasswd /etc/nginx/.htpasswd_brrrr your-username
-```
-
-Create or replace a user non-interactively:
-
-```sh
-sudo htpasswd -b /etc/nginx/.htpasswd_brrrr your-username your-password
-```
-
-If you change the Nginx config itself, validate and reload:
-
-```sh
-sudo nginx -t
-sudo systemctl reload nginx
-```
-
-## Deployment Troubleshooting
-
-### 403 Forbidden after deploy
-
-Cause we hit in this repo:
-
-- The uploaded `index.html` was owned by `root:root` and had mode `600`.
-- Nginx could traverse the directory but could not read the file.
-
-Fix:
-
-```sh
-chmod 644 /var/www/brrrr.app/html/hkbeerco/byob/index.html
-chown root:www-data /var/www/brrrr.app/html/hkbeerco/byob/index.html
-```
-
-The deploy script now automatically runs a remote `chmod`, which prevents the `600` file-mode issue from recurring.
-
-### 401 Unauthorized instead of the page
-
-Cause:
-
-- Nginx basic auth was applied to the whole `brrrr.app` site.
-- The microsite needed its own `auth_basic off` location block.
-
-Fix:
-
-- Add `location ^~ /hkbeerco/byob/ { auth_basic off; }` to the `brrrr.app` server block.
-- Run `nginx -t` and reload Nginx.
+- Current production host and filesystem paths
+- Where `brrrr.app` basic auth is configured
+- Where the htpasswd file lives
+- The public exception for `/hkbeerco/byob/`
+- Deployment troubleshooting for the 403 and 401 issues already encountered
 
 ## Operational Notes
 
 - The deploy script reads local config from `.env.deploy` by default.
 - The script supports `REMOTE_CHMOD`, defaulting to `644`.
 - If deploys start failing, check `SSH_KEY` first. It must reference the private key file, not `id_rsa.pub`.
-- If the site is public but prompts for login, inspect `/etc/nginx/sites-enabled/brrrr.app` first.
