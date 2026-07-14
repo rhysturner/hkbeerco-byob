@@ -44,9 +44,12 @@
     display: block;
   }
   .hero-copy{
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 14px 20px 0;
+    position: absolute;
+    left: 50%;
+    bottom: clamp(26px, 7vw, 56px);
+    transform: translateX(-50%);
+    width: min(92%, 760px);
+    padding: 0 20px;
     text-align: center;
     font-family: Avenir, 'Avenir Next', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     color: #fff;
@@ -54,6 +57,9 @@
     line-height: 1.25;
     font-weight: 600;
     text-wrap: balance;
+    background: transparent;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+    pointer-events: none;
   }
 
   .wrap{ max-width: 760px; margin: 0 auto; padding: 30px 20px 72px; }
