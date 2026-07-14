@@ -296,6 +296,101 @@
     z-index: 1;
   }
 
+  .promo-terms{
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    display: none;
+  }
+  .promo-terms__overlay{
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.72);
+  }
+  .promo-terms__dialog{
+    position: relative;
+    z-index: 1;
+    width: min(92vw, 680px);
+    margin: 40px auto;
+    background: #4f120f;
+    border: 1px solid rgba(255,255,255,0.14);
+    box-shadow: 0 20px 48px rgba(0,0,0,0.45);
+    color: #fff;
+    max-height: calc(100vh - 80px);
+    display: flex;
+    flex-direction: column;
+  }
+  .promo-terms__header{
+    padding: 18px 20px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+  }
+  .promo-terms__title{
+    font-family: 'Anton BYOB', 'Anton', sans-serif;
+    font-size: clamp(28px, 5vw, 44px);
+    line-height: 0.95;
+    color: #ff1f0f;
+    text-transform: uppercase;
+    letter-spacing: 0;
+  }
+  .promo-terms__subtitle{
+    margin-top: 8px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.72);
+  }
+  .promo-terms__body{
+    padding: 14px 20px;
+    overflow: auto;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+  .promo-terms__body p + p{ margin-top: 10px; }
+  .promo-terms__list{
+    margin: 10px 0 0 18px;
+    display: grid;
+    gap: 8px;
+  }
+  .promo-terms__confirm{
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 12px;
+    font-size: 12px;
+  }
+  .promo-terms__confirm input{
+    margin-top: 2px;
+    width: 16px;
+    height: 16px;
+    accent-color: #ff1f0f;
+  }
+  .promo-terms__actions{
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    padding: 14px 20px 18px;
+    border-top: 1px solid rgba(255,255,255,0.12);
+  }
+  .promo-terms__btn{
+    min-height: 38px;
+    border: 1px solid rgba(255,255,255,0.34);
+    background: transparent;
+    color: #fff;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .promo-terms__btn--agree{
+    background: #ff1f0f;
+    color: #5c1712;
+    border-color: #ff1f0f;
+  }
+  .promo-terms__btn[disabled]{
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
   @media (min-width: 640px){
     .wrap{ padding: 40px 24px 80px; }
     .field-row{ grid-template-columns: 1fr 1fr; gap: 18px; }
@@ -320,6 +415,38 @@
 <body>
 
 <div><div class="hulk_age_verify" id="hulk_age_verify"><div class="back_imge template-1 " id="preview_img"><div class="preview_box"> <section class="preview_box_section"><div class="preview_box_wrap">  <div class="logo" style="background-color: #ffffff;"><img src="https://dr8h81twidjpw.cloudfront.net/uploads/popup_setting/popup_logo_img/hkbererco_140x_2010270232.png" alt=""></div> <h2 class="pre_title" id="preview_header_text" style="font-weight: 700;">Are you 18 years of age or older?</h2><p class="pre_contain" id="preview_sub_header_text" style="font-weight: 400;"> Under the law of Hong Kong, intoxicating liquor must not be sold or supplied to a minor in the course of business.      根據香港法律，不得在業務過程中，向未成年人售賣或供應令人醺醉的酒類。</p> <div class="preview_btn" style="background-color:  transparent ;"><span class="main-box-bg" style="border-top-color:#ffffff;"></span><div class="agree"> <button type="button" data-verified="true" class="agree_btn btn_verified"><span>YES</span></button></div><div class="disagree" style="margin-left:15px;"> <button type="button" data-verified="false" class="disagree_btn btn_verified" id="btn_disabled"><span>NO</span></button></div></div></div> </section></div><div class="av_overlay"></div></div></div></div>
+
+<div class="promo-terms" id="promoTerms" aria-hidden="true">
+  <div class="promo-terms__overlay"></div>
+  <div class="promo-terms__dialog" role="dialog" aria-modal="true" aria-labelledby="promoTermsTitle">
+    <div class="promo-terms__header">
+      <h2 class="promo-terms__title" id="promoTermsTitle">Promotion Terms &amp; Conditions</h2>
+      <p class="promo-terms__subtitle">BYOB: Bring Your Own Boss - Hong Kong Beer promotion</p>
+    </div>
+    <div class="promo-terms__body">
+      <p>By continuing, you confirm you understand and accept the terms for this promotion.</p>
+      <ol class="promo-terms__list">
+        <li>This promotion is open to persons aged 18+ only. Valid photo ID may be required at redemption.</li>
+        <li>Invite creation must be completed through this BYOB page using a real email, selected venue, topic, and event time.</li>
+        <li>Free beer redemption is checked manually against HK Beer records and your event details (including attendee email, selected venue, and event context).</li>
+        <li>One free beer redemption per verified attendee, per eligible invite, unless otherwise stated by HK Beer.</li>
+        <li>Redemption is available only at participating venues and only while stocks last. Venue availability and service times apply.</li>
+        <li>Offer is non-transferable, non-exchangeable, and not redeemable for cash or credit.</li>
+        <li>HK Beer may verify entries and may refuse, suspend, or cancel claims that are incomplete, misleading, duplicate, abusive, or not compliant with these terms.</li>
+        <li>HK Beer may amend, pause, or end this promotion where reasonably required, including stock limits, operational constraints, or legal requirements.</li>
+        <li>Please drink responsibly. Under Hong Kong law, intoxicating liquor must not be sold or supplied to a minor in the course of business.</li>
+      </ol>
+      <label class="promo-terms__confirm" for="promoTermsConfirm">
+        <input type="checkbox" id="promoTermsConfirm">
+        <span>I am 18 or older and I agree to the Promotion Terms &amp; Conditions above.</span>
+      </label>
+    </div>
+    <div class="promo-terms__actions">
+      <button type="button" class="promo-terms__btn" id="promoTermsDecline">Decline</button>
+      <button type="button" class="promo-terms__btn promo-terms__btn--agree" id="promoTermsAgree" disabled>Agree &amp; Continue</button>
+    </div>
+  </div>
+</div>
 
 <div class="hero">
   <img class="hero-art" src="images/BYOB_Microsite_header_1.png" alt="BYOB Microsite header art">
@@ -605,35 +732,97 @@
   const ageGate = document.getElementById('hulk_age_verify');
   const ageYesBtn = document.querySelector('.agree_btn');
   const ageNoBtn = document.querySelector('.disagree_btn');
+  const promoTerms = document.getElementById('promoTerms');
+  const promoTermsConfirm = document.getElementById('promoTermsConfirm');
+  const promoTermsAgree = document.getElementById('promoTermsAgree');
+  const promoTermsDecline = document.getElementById('promoTermsDecline');
   const ageKey = 'byob_age_verified';
+  const termsKey = 'byob_terms_accepted_v1';
+
+  function syncBodyScrollLock(){
+    const ageVisible = ageGate && ageGate.style.display !== 'none';
+    const termsVisible = promoTerms && promoTerms.style.display !== 'none';
+    document.body.style.overflow = (ageVisible || termsVisible) ? 'hidden' : '';
+  }
 
   function openAgeGate(){
     if(!ageGate) return;
     ageGate.style.display = 'block';
-    document.body.style.overflow = 'hidden';
+    syncBodyScrollLock();
   }
 
   function closeAgeGate(){
     if(!ageGate) return;
     ageGate.style.display = 'none';
-    document.body.style.overflow = '';
+    syncBodyScrollLock();
+  }
+
+  function openPromoTerms(){
+    if(!promoTerms) return;
+    promoTerms.style.display = 'block';
+    promoTerms.setAttribute('aria-hidden', 'false');
+    if(promoTermsConfirm){
+      promoTermsConfirm.checked = false;
+    }
+    if(promoTermsAgree){
+      promoTermsAgree.disabled = true;
+    }
+    syncBodyScrollLock();
+  }
+
+  function closePromoTerms(){
+    if(!promoTerms) return;
+    promoTerms.style.display = 'none';
+    promoTerms.setAttribute('aria-hidden', 'true');
+    syncBodyScrollLock();
   }
 
   if(localStorage.getItem(ageKey) === 'true'){
     closeAgeGate();
+    if(localStorage.getItem(termsKey) === 'true'){
+      closePromoTerms();
+    } else {
+      openPromoTerms();
+    }
   } else {
     openAgeGate();
+    closePromoTerms();
   }
 
   if(ageYesBtn){
     ageYesBtn.addEventListener('click', function(){
       localStorage.setItem(ageKey, 'true');
       closeAgeGate();
+      if(localStorage.getItem(termsKey) !== 'true'){
+        openPromoTerms();
+      }
     });
   }
 
   if(ageNoBtn){
     ageNoBtn.addEventListener('click', function(){
+      window.location.href = 'https://hkbeerco.com/';
+    });
+  }
+
+  if(promoTermsConfirm && promoTermsAgree){
+    promoTermsConfirm.addEventListener('change', function(){
+      promoTermsAgree.disabled = !promoTermsConfirm.checked;
+    });
+  }
+
+  if(promoTermsAgree){
+    promoTermsAgree.addEventListener('click', function(){
+      if(!promoTermsConfirm || !promoTermsConfirm.checked){
+        return;
+      }
+      localStorage.setItem(termsKey, 'true');
+      closePromoTerms();
+    });
+  }
+
+  if(promoTermsDecline){
+    promoTermsDecline.addEventListener('click', function(){
       window.location.href = 'https://hkbeerco.com/';
     });
   }
