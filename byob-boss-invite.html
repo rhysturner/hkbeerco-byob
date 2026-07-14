@@ -61,6 +61,7 @@
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
     pointer-events: none;
   }
+  .hero-copy-mobile{ display: none; }
 
   .wrap{ max-width: 760px; margin: 0 auto; padding: 30px 20px 72px; }
 
@@ -299,6 +300,20 @@
     .field-row{ grid-template-columns: 1fr 1fr; gap: 18px; }
     .cal-options{ grid-template-columns: repeat(2, 1fr); }
   }
+
+  @media (max-width: 639px){
+    .hero-copy{
+      bottom: 18px;
+      width: min(92%, 410px);
+      padding: 0 14px;
+      font-size: 12.5px;
+      line-height: 1.18;
+      font-weight: 700;
+      text-wrap: pretty;
+    }
+    .hero-copy-desktop{ display: none; }
+    .hero-copy-mobile{ display: inline; }
+  }
 </style>
 </head>
 <body>
@@ -307,7 +322,10 @@
 
 <div class="hero">
   <img class="hero-art" src="images/BYOB_Microsite_header_1.png" alt="BYOB Microsite header art">
-  <div class="hero-copy">Turn "we should catch up" into a real invite — to an actual bar, during the actual final. Your boss will know exactly what they're saying yes to.</div>
+  <div class="hero-copy">
+    <span class="hero-copy-desktop">Turn "we should catch up" into a real invite — to an actual bar, during the actual final. Your boss will know exactly what they're saying yes to.</span>
+    <span class="hero-copy-mobile">Turn "we should catch up" into a real bar invite for the final. Your boss will know exactly what they're saying yes to.</span>
+  </div>
 </div>
 
 <div class="wrap">
