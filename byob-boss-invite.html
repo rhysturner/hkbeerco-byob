@@ -215,6 +215,79 @@
     letter-spacing: 0.04em;
   }
 
+  .hulk_age_verify{
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+  }
+  .hulk_age_verify .back_imge{
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+  }
+  .hulk_age_verify .preview_box{
+    position: relative;
+    z-index: 2;
+    width: min(92vw, 460px);
+    background: #ffffff;
+    color: #111;
+    border-radius: 2px;
+    padding: 20px 22px;
+    text-align: center;
+    box-shadow: 0 12px 36px rgba(0,0,0,0.42);
+  }
+  .hulk_age_verify .logo{
+    background-color: #ffffff;
+    margin-bottom: 12px;
+  }
+  .hulk_age_verify .logo img{
+    width: 58px;
+    height: auto;
+  }
+  .hulk_age_verify .pre_title{
+    font-family: Avenir, 'Avenir Next', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 28px;
+    line-height: 1.1;
+    margin-bottom: 10px;
+    color: #1e1e1e;
+  }
+  .hulk_age_verify .pre_contain{
+    font-size: 11px;
+    line-height: 1.35;
+    color: #4a4a4a;
+    margin-bottom: 14px;
+  }
+  .hulk_age_verify .preview_btn{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+  }
+  .hulk_age_verify .btn_verified{
+    min-width: 56px;
+    min-height: 34px;
+    border: 1px solid #1c1c1c;
+    background: #fff;
+    color: #111;
+    font-family: Avenir, 'Avenir Next', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .hulk_age_verify .agree_btn{
+    background: #000;
+    color: #fff;
+    border-color: #000;
+  }
+  .hulk_age_verify .av_overlay{
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.62);
+    z-index: 1;
+  }
+
   @media (min-width: 640px){
     .wrap{ padding: 40px 24px 80px; }
     .field-row{ grid-template-columns: 1fr 1fr; gap: 18px; }
@@ -223,6 +296,8 @@
 </style>
 </head>
 <body>
+
+<div><div class="hulk_age_verify" id="hulk_age_verify"><div class="back_imge template-1 " id="preview_img"><div class="preview_box"> <section class="preview_box_section"><div class="preview_box_wrap">  <div class="logo" style="background-color: #ffffff;"><img src="https://dr8h81twidjpw.cloudfront.net/uploads/popup_setting/popup_logo_img/hkbererco_140x_2010270232.png" alt=""></div> <h2 class="pre_title" id="preview_header_text" style="font-weight: 700;">Are you 18 years of age or older?</h2><p class="pre_contain" id="preview_sub_header_text" style="font-weight: 400;"> Under the law of Hong Kong, intoxicating liquor must not be sold or supplied to a minor in the course of business.      根據香港法律，不得在業務過程中，向未成年人售賣或供應令人醺醉的酒類。</p> <div class="preview_btn" style="background-color:  transparent ;"><span class="main-box-bg" style="border-top-color:#ffffff;"></span><div class="agree"> <button type="button" data-verified="true" class="agree_btn btn_verified"><span>YES</span></button></div><div class="disagree" style="margin-left:15px;"> <button type="button" data-verified="false" class="disagree_btn btn_verified" id="btn_disabled"><span>NO</span></button></div></div></div> </section></div><div class="av_overlay"></div></div></div></div>
 
 <div class="hero">
   <img class="hero-art" src="images/BYOB_Microsite_header_1.png" alt="BYOB Microsite header art">
@@ -413,8 +488,6 @@
     const bodyText = bodyParagraphs.join('\r\n\r\n');
     const bodyOutlook = bodyParagraphs.join('<br><br>');
 
-    const invite = { bossName, bossEmail, subject, body: bodyText, venue, start, end, topic, mapLink, attendees };
-
     // Google Calendar: &add= attaches a guest directly to the event being created.
     // &ctz= pins the exact IANA timezone so the time shown matches what was
     // typed, instead of Google guessing (and sometimes assuming UTC).
@@ -500,6 +573,42 @@
     el.classList.add('on');
     clearTimeout(statusTimer);
     statusTimer = setTimeout(function(){ el.classList.remove('on'); }, 4000);
+  }
+
+  const ageGate = document.getElementById('hulk_age_verify');
+  const ageYesBtn = document.querySelector('.agree_btn');
+  const ageNoBtn = document.querySelector('.disagree_btn');
+  const ageKey = 'byob_age_verified';
+
+  function openAgeGate(){
+    if(!ageGate) return;
+    ageGate.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeAgeGate(){
+    if(!ageGate) return;
+    ageGate.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  if(localStorage.getItem(ageKey) === 'true'){
+    closeAgeGate();
+  } else {
+    openAgeGate();
+  }
+
+  if(ageYesBtn){
+    ageYesBtn.addEventListener('click', function(){
+      localStorage.setItem(ageKey, 'true');
+      closeAgeGate();
+    });
+  }
+
+  if(ageNoBtn){
+    ageNoBtn.addEventListener('click', function(){
+      window.location.href = 'https://hkbeerco.com/';
+    });
   }
 })();
 </script>
