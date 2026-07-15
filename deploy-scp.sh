@@ -12,7 +12,7 @@ if [[ -f "$ENV_FILE" ]]; then
 fi
 
 SOURCE_FILE="${SOURCE_FILE:-byob-boss-invite.html}"
-ASSET_DIRS="${ASSET_DIRS:-images fonts}"
+ASSET_DIRS="${ASSET_DIRS:-images fonts promo}"
 REMOTE_USER="${REMOTE_USER:-}"
 REMOTE_HOST="${REMOTE_HOST:-}"
 REMOTE_DIR="${REMOTE_DIR:-}"
@@ -52,7 +52,7 @@ Set these values in $ENV_FILE or export them before running:
 Optional variables:
   SOURCE_FILE   File to upload (default: byob-boss-invite.html)
   ASSET_DIRS    Space-separated directories to upload recursively
-                (default: "images fonts")
+                (default: "images fonts promo")
   REMOTE_NAME   Filename to use on the server (default: same as SOURCE_FILE)
   SSH_PORT      SSH port (default: 22)
   SSH_KEY       Path to a private key file

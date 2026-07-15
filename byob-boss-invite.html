@@ -519,6 +519,7 @@
     </select>
     <span class="hint" id="venueHint">Choose the actual bar. This venue is used for invite creation and redemption check-off lists.</span>
     <a href="#" id="venueMapLink" target="_blank" rel="noopener" style="display:none; margin-top:8px; font-size:12.5px; color:var(--ember); text-decoration:none; font-weight:600;">📍 View on Google Maps →</a>
+    <a href="#" id="promoDebugLink" target="_blank" rel="noopener" style="display:none; margin-top:8px; font-size:12.5px; color:#fff; text-decoration:none; font-weight:600;">🎟 Promo Debug Link →</a>
   </div>
 
   <div class="field" id="timeField">
@@ -595,6 +596,7 @@
   const venueLabel = document.getElementById('venueLabel');
   const venueHint = document.getElementById('venueHint');
   const venueMapLink = document.getElementById('venueMapLink');
+  const promoDebugLink = document.getElementById('promoDebugLink');
   const timeField = document.getElementById('timeField');
   const timeInput = document.getElementById('time');
   const modeBarBtn = document.getElementById('modeBar');
@@ -654,6 +656,18 @@
   modeVirtualBtn.addEventListener('click', function(){ setMeetingMode('virtual'); });
 
   function syncVenueMapLink(){
+    const location = meetingMode === 'virtual' ? 'Virtual' : venueInput.value.trim();
+    const promoCode = promoCodeForLocation(location);
+    const promoUrl = promoUrlForLocation(location);
+
+    if(promoCode && promoUrl){
+      promoDebugLink.textContent = '🎟 Promo Debug: ' + promoCode + ' →';
+      promoDebugLink.href = promoUrl;
+      promoDebugLink.style.display = 'inline-block';
+    } else {
+      promoDebugLink.style.display = 'none';
+    }
+
     if(meetingMode === 'virtual'){
       venueMapLink.textContent = 'Virtual';
       venueMapLink.removeAttribute('href');

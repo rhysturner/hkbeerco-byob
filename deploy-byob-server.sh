@@ -30,7 +30,7 @@ WEB_ROOT="${WEB_ROOT:-/var/www/${DOMAIN}/html}"
 # Deployment payload
 SOURCE_FILE="${SOURCE_FILE:-byob-boss-invite.html}"
 TARGET_HTML="${TARGET_HTML:-index.html}"
-ASSET_DIRS="${ASSET_DIRS:-images fonts}"
+ASSET_DIRS="${ASSET_DIRS:-images fonts promo}"
 REMOTE_FILE_CHMOD="${REMOTE_FILE_CHMOD:-644}"
 REMOTE_DIR_CHMOD="${REMOTE_DIR_CHMOD:-755}"
 
@@ -125,6 +125,10 @@ server {
 
     root \$WEB_ROOT;
     index index.html;
+
+    location ^~ /promo/ {
+      try_files \\$uri \\$uri/ /promo/index.html;
+    }
 
     location / {
       try_files \\\$uri \\\$uri/ =404;

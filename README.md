@@ -5,6 +5,7 @@
 This repo contains a single-file static microsite for the BYOB campaign.
 
 - Main app: `byob-boss-invite.html`
+- Promo redeem app: `promo/index.html`
 - Deployment helper: `deploy-scp.sh`
 - Local deploy template: `.env.deploy.example`
 - Internal project notes: `AGENTS.md`
@@ -43,11 +44,19 @@ There is no backend, build step, or package manager. The site is deployed by cop
 	- Plain text body used for Google/ICS.
 	- HTML `<br><br>` body used for Outlook deep links.
 	- Outlook note appends a `Promo QR` image generated at runtime from the promo URL and embedded as a base64 data URL.
+- Promo redemption landing:
+	- Dynamic single-page redemption UI at `promo/index.html`.
+	- Reads promo code from either:
+		- path style: `/promo/<PROMOCODE>/`
+		- query style: `/promo/?code=<PROMOCODE>`
+	- Displays a tick, promo code, venue mapping, and redemption copy (`Thank you! Beer redeemed.`).
+	- Shows an invalid-code state when mapping is not found.
 
 ## Repo Structure
 
 ```text
 byob-boss-invite.html   Main microsite
+promo/index.html        Promo redemption landing app
 deploy-scp.sh           SCP deploy script
 .env.deploy.example     Template for local deploy config
 ops/server-notes.md     Live server and auth notes
@@ -98,6 +107,25 @@ Notes:
 - If you use `ssh-agent`, you can omit `SSH_KEY` entirely.
 - `.env.deploy` and `.env.deploy.local` are gitignored.
 - The deploy script now runs a remote `chmod` after upload so the file stays readable by Nginx.
+- Default `ASSET_DIRS` now includes `promo`, so `promo/index.html` deploys with images/fonts.
+
+### Nginx routing for dynamic promo paths
+
+To make `/promo/<PROMOCODE>/` resolve to `promo/index.html` on static hosting, add a location fallback:
+
+```nginx
+location ^~ /promo/ {
+	try_files $uri $uri/ /promo/index.html;
+}
+```
+
+If you host under a subpath (for example `/hkbeerco/byob/`), use:
+
+```nginx
+location ^~ /hkbeerco/byob/promo/ {
+	try_files $uri $uri/ /hkbeerco/byob/promo/index.html;
+}
+```
 
 If you want to use a different env file name:
 
@@ -155,3 +183,6 @@ That file covers:
 	- Virtual mode uses virtual-specific invite copy.
 7. Validate Outlook note rendering:
 	- `Promo QR` heading appears with embedded QR image.
+8. Validate promo redemption routes:
+	- Open a known code URL like `/promo/BAB852/` and verify tick + code + venue.
+	- Open an unknown code URL like `/promo/NOPE123/` and verify invalid-code state.
