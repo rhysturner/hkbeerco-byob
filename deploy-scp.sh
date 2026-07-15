@@ -22,6 +22,11 @@ SSH_KEY="${SSH_KEY:-}"
 REMOTE_FILE_CHMOD="${REMOTE_FILE_CHMOD:-${REMOTE_CHMOD:-644}}"
 REMOTE_DIR_CHMOD="${REMOTE_DIR_CHMOD:-755}"
 REMOTE_CHMOD_STRICT="${REMOTE_CHMOD_STRICT:-0}"
+SSH_RETRIES="${SSH_RETRIES:-5}"
+SSH_RETRY_DELAY="${SSH_RETRY_DELAY:-2}"
+SSH_CONTROL_MASTER="${SSH_CONTROL_MASTER:-1}"
+SSH_CONTROL_PERSIST="${SSH_CONTROL_PERSIST:-10m}"
+SSH_CONTROL_PATH="${SSH_CONTROL_PATH:-$HOME/.ssh/cm-%r@%h:%p}"
 CONFIGURE_PROMO_ROUTE="${CONFIGURE_PROMO_ROUTE:-1}"
 REMOTE_NGINX_SITE="${REMOTE_NGINX_SITE:-/etc/nginx/sites-available/brrrr.app}"
 PROMO_ROUTE_PREFIX="${PROMO_ROUTE_PREFIX:-/hkbeerco/byob/promo/}"
@@ -71,6 +76,12 @@ Optional variables:
   REMOTE_FILE_CHMOD  File mode applied to uploaded files (default: 644)
   REMOTE_DIR_CHMOD   Directory mode applied to uploaded dirs (default: 755)
   REMOTE_CHMOD_STRICT  Fail deploy when chmod step fails (default: 0)
+  SSH_RETRIES   Number of SSH retries for post-upload steps (default: 5)
+  SSH_RETRY_DELAY  Seconds between SSH retries (default: 2)
+  SSH_CONTROL_MASTER  Reuse one SSH connection to reduce prompts (default: 1)
+  SSH_CONTROL_PERSIST  Keep master connection alive (default: 10m)
+  SSH_CONTROL_PATH  Control socket path pattern
+                    (default: ~/.ssh/cm-%r@%h:%p)
   CONFIGURE_PROMO_ROUTE  Configure nginx promo route fallback (default: 1)
   REMOTE_NGINX_SITE  Remote nginx site file path (default: /etc/nginx/sites-available/brrrr.app)
   PROMO_ROUTE_PREFIX  URL prefix for promo routes (default: /hkbeerco/byob/promo/)
@@ -104,7 +115,51 @@ if [[ -n "$SSH_KEY" ]]; then
   ssh_args+=(-i "$SSH_KEY")
 fi
 
+if [[ "$SSH_CONTROL_MASTER" == "1" ]]; then
+  scp_args+=(-o ControlMaster=auto -o "ControlPersist=$SSH_CONTROL_PERSIST" -o "ControlPath=$SSH_CONTROL_PATH")
+  ssh_args+=(-o ControlMaster=auto -o "ControlPersist=$SSH_CONTROL_PERSIST" -o "ControlPath=$SSH_CONTROL_PATH")
+fi
+
 target="$REMOTE_USER@$REMOTE_HOST:$REMOTE_DIR/$REMOTE_NAME"
+
+ssh_retry_run() {
+  local command="$1"
+  local attempt=1
+  while true; do
+    if ssh "${ssh_args[@]}" "$REMOTE_USER@$REMOTE_HOST" "$command"; then
+      return 0
+    fi
+    if [[ "$attempt" -ge "$SSH_RETRIES" ]]; then
+      return 1
+    fi
+    echo "SSH command failed (attempt $attempt/$SSH_RETRIES). Retrying in ${SSH_RETRY_DELAY}s..." >&2
+    attempt=$((attempt + 1))
+    sleep "$SSH_RETRY_DELAY"
+  done
+}
+
+ssh_retry_script() {
+  local script="$1"
+  local attempt=1
+  while true; do
+    if ssh "${ssh_args[@]}" "$REMOTE_USER@$REMOTE_HOST" "bash -s" <<<"$script"; then
+      return 0
+    fi
+    if [[ "$attempt" -ge "$SSH_RETRIES" ]]; then
+      return 1
+    fi
+    echo "SSH script failed (attempt $attempt/$SSH_RETRIES). Retrying in ${SSH_RETRY_DELAY}s..." >&2
+    attempt=$((attempt + 1))
+    sleep "$SSH_RETRY_DELAY"
+  done
+}
+
+if [[ "$SSH_CONTROL_MASTER" == "1" ]]; then
+  # Prime a single SSH master connection so subsequent scp/ssh calls reuse it.
+  if ! ssh_retry_run "true"; then
+    echo "Warning: Could not pre-establish SSH control master. Continuing without warm connection." >&2
+  fi
+fi
 
 echo "Uploading $SOURCE_FILE to $target"
 scp "${scp_args[@]}" "$SOURCE_FILE" "$target"
@@ -124,7 +179,7 @@ if [[ ${#asset_dirs[@]} -gt 0 ]]; then
   done
 fi
 
-if ! ssh "${ssh_args[@]}" "$REMOTE_USER@$REMOTE_HOST" "$chmod_cmd"; then
+if ! ssh_retry_run "$chmod_cmd"; then
   echo "Warning: Post-upload chmod step failed (upload may still be complete)." >&2
   if [[ "$REMOTE_CHMOD_STRICT" == "1" ]]; then
     echo "Failing because REMOTE_CHMOD_STRICT=1." >&2
@@ -132,9 +187,10 @@ if ! ssh "${ssh_args[@]}" "$REMOTE_USER@$REMOTE_HOST" "$chmod_cmd"; then
   fi
 fi
 
+promo_route_configured=1
 if [[ "$CONFIGURE_PROMO_ROUTE" == "1" ]]; then
   echo "Ensuring nginx promo route fallback exists in $REMOTE_NGINX_SITE"
-  if ! ssh "${ssh_args[@]}" "$REMOTE_USER@$REMOTE_HOST" "bash -s" <<EOF
+  route_script=$(cat <<EOF
 set -euo pipefail
 
 REMOTE_NGINX_SITE="$REMOTE_NGINX_SITE"
@@ -192,9 +248,12 @@ sudo mv "\$tmp_file" "\$REMOTE_NGINX_SITE"
 sudo nginx -t
 sudo systemctl reload nginx
 EOF
+)
+  if ssh_retry_script "$route_script"
   then
     echo "Promo route configuration applied or already present."
   else
+    promo_route_configured=0
     echo "Warning: Promo route configuration step failed." >&2
     if [[ "$PROMO_ROUTE_STRICT" == "1" ]]; then
       echo "Failing because PROMO_ROUTE_STRICT=1." >&2
@@ -204,6 +263,13 @@ EOF
 fi
 
 if [[ "$VERIFY_PROMO_ROUTE" == "1" ]]; then
+  if [[ "$CONFIGURE_PROMO_ROUTE" == "1" && "$promo_route_configured" == "0" ]]; then
+    echo "Skipping promo route verification because route configuration failed."
+    echo "Re-run deploy or fix SSH connectivity, then verify route again." >&2
+    echo "Upload complete"
+    exit 0
+  fi
+
   verify_url="${VERIFY_PROMO_BASE_URL%/}/$VERIFY_PROMO_CODE/"
   echo "Verifying promo route: $verify_url"
   if curl -fsSL "$verify_url" | grep -Fq "$VERIFY_PROMO_EXPECT"; then
@@ -215,6 +281,10 @@ if [[ "$VERIFY_PROMO_ROUTE" == "1" ]]; then
       exit 1
     fi
   fi
+fi
+
+if [[ "$SSH_CONTROL_MASTER" == "1" ]]; then
+  ssh "${ssh_args[@]}" -O exit "$REMOTE_USER@$REMOTE_HOST" >/dev/null 2>&1 || true
 fi
 
 echo "Upload complete"

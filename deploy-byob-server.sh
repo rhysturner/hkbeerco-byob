@@ -16,6 +16,9 @@ REMOTE_USER="${REMOTE_USER:-}"
 REMOTE_HOST="${REMOTE_HOST:-}"
 SSH_PORT="${SSH_PORT:-22}"
 SSH_KEY="${SSH_KEY:-}"
+SSH_CONTROL_MASTER="${SSH_CONTROL_MASTER:-1}"
+SSH_CONTROL_PERSIST="${SSH_CONTROL_PERSIST:-10m}"
+SSH_CONTROL_PATH="${SSH_CONTROL_PATH:-$HOME/.ssh/cm-%r@%h:%p}"
 
 # Domain + SSL
 DOMAIN="${DOMAIN:-byob-hkbeer.co}"
@@ -85,7 +88,19 @@ if [[ -n "$SSH_KEY" ]]; then
   scp_args+=(-i "$SSH_KEY")
 fi
 
+if [[ "$SSH_CONTROL_MASTER" == "1" ]]; then
+  scp_args+=(-o ControlMaster=auto -o "ControlPersist=$SSH_CONTROL_PERSIST" -o "ControlPath=$SSH_CONTROL_PATH")
+  ssh_args+=(-o ControlMaster=auto -o "ControlPersist=$SSH_CONTROL_PERSIST" -o "ControlPath=$SSH_CONTROL_PATH")
+fi
+
 remote_host="$REMOTE_USER@$REMOTE_HOST"
+
+if [[ "$SSH_CONTROL_MASTER" == "1" ]]; then
+  # Prime one SSH connection so later scp/ssh calls reuse it.
+  if ! ssh "${ssh_args[@]}" "$remote_host" "true"; then
+    echo "Warning: Could not pre-establish SSH control master; continuing." >&2
+  fi
+fi
 
 echo "==> Target host: $remote_host"
 echo "==> Domain: $DOMAIN (and $WWW_DOMAIN)"
@@ -192,6 +207,10 @@ sudo find "\$WEB_ROOT" -type d -exec chmod "\$REMOTE_DIR_CHMOD" {} +
 sudo find "\$WEB_ROOT" -type f -exec chmod "\$REMOTE_FILE_CHMOD" {} +
 sudo chown -R www-data:www-data "\$WEB_ROOT"
 EOF
+fi
+
+if [[ "$SSH_CONTROL_MASTER" == "1" ]]; then
+  ssh "${ssh_args[@]}" -O exit "$remote_host" >/dev/null 2>&1 || true
 fi
 
 echo "==> Done"
