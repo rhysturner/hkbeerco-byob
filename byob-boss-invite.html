@@ -698,7 +698,22 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
     if(!code){
       return '';
     }
-    return new URL(PROMO_BASE_PATH + code + '/', window.location.href).href;
+    // When opened as a local file, generate a public URL recipients can actually use.
+    const baseHref = window.location.protocol === 'file:'
+      ? 'https://byob-hkbeer.co/'
+      : window.location.href;
+    return new URL(PROMO_BASE_PATH + code + '/', baseHref).href;
+  }
+
+  function promoQrImageUrlForLocation(location){
+    const code = promoCodeForLocation(location);
+    if(!code){
+      return '';
+    }
+    const baseHref = window.location.protocol === 'file:'
+      ? 'https://byob-hkbeer.co/'
+      : window.location.href;
+    return new URL(PROMO_BASE_PATH + 'qr/' + code + '.png', baseHref).href;
   }
 
   const COPY = {
@@ -770,6 +785,7 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
       openedOutlookWork: 'Opened in Outlook (work/school). Hit Send there to block your time and send the invite. If it loops to sign-in, use Outlook.com personal or .ics.',
       openedIcs: 'Downloaded .ics. Open it in your desktop calendar app and save to send invites.',
       qrBase64Error: 'Unable to convert QR image to base64.',
+      promoQrFallback: 'Promo QR image: {{promoQrImageUrl}}',
       subject: '{{topic}} — hosted by Hong Kong Beer',
       bodyVirtual: [
         'Hi {{bossName}}',
@@ -858,6 +874,7 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
       openedOutlookWork: '已於 Outlook（工作/學校）開啟。請按「傳送」以鎖定時間並發送邀請。如頁面跳轉至登入畫面，請改用 Outlook.com 個人版或 .ics。',
       openedIcs: '已下載 .ics 檔案。請於桌面日曆應用程式開啟並儲存以發送邀請。',
       qrBase64Error: '無法將 QR 圖片轉換為 base64。',
+      promoQrFallback: '推廣 QR 圖片：{{promoQrImageUrl}}',
       subject: '{{topic}} — 由 Hong Kong Beer 主辦',
       bodyVirtual: [
         '你好，{{bossName}}',
@@ -1200,6 +1217,7 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
     const mapLink = mapsUrl(venue);
     const promoCode = promoCodeForLocation(venue);
     const promoUrl = promoUrlForLocation(venue);
+    const promoQrImageUrl = promoQrImageUrlForLocation(venue);
     let promoQrBase64 = '';
     try{
       promoQrBase64 = await promoQrBase64DataUrl(promoUrl);
@@ -1212,6 +1230,9 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
     const bodyParagraphs = bodyTemplates.map(function(line){
       return formatTemplate(line, { bossName: bossName, topic: topic, venue: venue });
     });
+    if(promoQrImageUrl){
+      bodyParagraphs.push(formatTemplate(copy.promoQrFallback, { promoQrImageUrl: promoQrImageUrl }));
+    }
 
     // Google Calendar accepts plain LF newlines more consistently for details.
     const bodyText = bodyParagraphs.join('\n\n');
