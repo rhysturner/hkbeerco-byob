@@ -518,10 +518,6 @@
     </select>
     <span class="hint" id="venueHint">Choose the actual bar. This venue is used for invite creation and redemption check-off lists.</span>
     <a href="#" id="venueMapLink" target="_blank" rel="noopener" style="display:none; margin-top:8px; font-size:12.5px; color:var(--ember); text-decoration:none; font-weight:600;">📍 View on Google Maps →</a>
-    <div id="promoQrWrap" style="display:none; margin-top:10px;">
-      <img id="promoQrImage" alt="Promo QR code" width="160" height="160" style="display:block; width:160px; height:160px; border:1px solid rgba(255,255,255,0.25); background:#fff;">
-      <a href="#" id="promoLink" target="_blank" rel="noopener" style="display:inline-block; margin-top:8px; font-size:12.5px; color:#fff; text-decoration:none; font-weight:600;">🎟 Promo →</a>
-    </div>
   </div>
 
   <div class="field">
@@ -596,9 +592,6 @@
   const venueLabel = document.getElementById('venueLabel');
   const venueHint = document.getElementById('venueHint');
   const venueMapLink = document.getElementById('venueMapLink');
-  const promoQrWrap = document.getElementById('promoQrWrap');
-  const promoQrImage = document.getElementById('promoQrImage');
-  const promoLink = document.getElementById('promoLink');
   const modeBarBtn = document.getElementById('modeBar');
   const modeVirtualBtn = document.getElementById('modeVirtual');
   const topicInput = document.getElementById('topic');
@@ -652,20 +645,6 @@
   modeVirtualBtn.addEventListener('click', function(){ setMeetingMode('virtual'); });
 
   function syncVenueMapLink(){
-    const location = meetingMode === 'virtual' ? 'Virtual' : venueInput.value.trim();
-    const promoCode = promoCodeForLocation(location);
-    const promoUrl = promoUrlForLocation(location);
-
-    if(promoCode && promoUrl){
-      promoLink.href = promoUrl;
-      promoLink.textContent = '🎟 Promo: ' + promoCode + ' →';
-      promoQrImage.src = 'https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=' + encodeURIComponent(promoUrl);
-      promoQrWrap.style.display = 'block';
-      promoLink.style.pointerEvents = 'auto';
-    } else {
-      promoQrWrap.style.display = 'none';
-    }
-
     if(meetingMode === 'virtual'){
       venueMapLink.textContent = 'Virtual';
       venueMapLink.removeAttribute('href');
@@ -709,7 +688,35 @@
   function fmtICS(d){
     return d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate()) + 'T' + pad(d.getHours()) + pad(d.getMinutes()) + '00';
   }
-  document.getElementById('addEventBtn').addEventListener('click', function(){
+  function blobToDataUrl(blob){
+    return new Promise(function(resolve, reject){
+      const reader = new FileReader();
+      reader.onloadend = function(){
+        resolve(typeof reader.result === 'string' ? reader.result : '');
+      };
+      reader.onerror = function(){
+        reject(new Error('Unable to convert QR image to base64.'));
+      };
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  async function promoQrBase64DataUrl(promoUrl){
+    if(!promoUrl){
+      return '';
+    }
+
+    const qrApi = 'https://api.qrserver.com/v1/create-qr-code/?size=96x96&data=' + encodeURIComponent(promoUrl);
+    const response = await fetch(qrApi, { cache: 'no-store' });
+    if(!response.ok){
+      return '';
+    }
+
+    const qrBlob = await response.blob();
+    return blobToDataUrl(qrBlob);
+  }
+
+  document.getElementById('addEventBtn').addEventListener('click', async function(){
     const bossName = document.getElementById('bossName').value.trim() || 'there';
     const selectedTopic = topicInput.value;
     const topic = selectedTopic === '__custom__' ? topicCustomInput.value.trim() : selectedTopic;
@@ -736,6 +743,13 @@
     const mapLink = mapsUrl(venue);
     const promoCode = promoCodeForLocation(venue);
     const promoUrl = promoUrlForLocation(venue);
+    let promoQrBase64 = '';
+    try{
+      promoQrBase64 = await promoQrBase64DataUrl(promoUrl);
+    } catch(err){
+      promoQrBase64 = '';
+    }
+
     const subject = topic + ' — hosted by Hong Kong Beer';
     const bodyParagraphs = [
       'Hi ' + bossName,
@@ -743,15 +757,18 @@
       'We can talk about how we\'re moving forward on ' + topic + '.',
       'We probably won\'t. But we can.',
       'Oh by the way, because you\'re coming with me, we\'ll both get a free Hong Kong Beer.',
-      'Promo code: ' + (promoCode || 'N/A') + '.',
-      'Promo URL: ' + (promoUrl || 'N/A'),
       'Food for thought.',
       'HK Beer: Show this invite at the bar to claim your free beer.',
-      'See you then.'
+      'See you then.',
+      'Promo Footer: ' + (promoCode || 'N/A') + ' | ' + (promoUrl || 'N/A'),
+      'Promo QR Base64: ' + (promoQrBase64 || 'N/A')
     ];
 
     const bodyText = bodyParagraphs.join('\r\n\r\n');
-    const bodyOutlook = bodyParagraphs.join('<br><br>');
+    let bodyOutlook = bodyParagraphs.join('<br><br>');
+    if(promoQrBase64){
+      bodyOutlook += '<br><br><strong>Promo QR (Base64 image)</strong><br><img src="' + promoQrBase64 + '" alt="Promo QR" width="96" height="96">';
+    }
 
     // Google Calendar: &add= attaches a guest directly to the event being created.
     // &ctz= pins the exact IANA timezone so the time shown matches what was
