@@ -26,6 +26,9 @@ WWW_DOMAIN="${WWW_DOMAIN:-www.byob-hkbeer.co}"
 LE_EMAIL="${LE_EMAIL:-}"
 CERTBOT_STAGING="${CERTBOT_STAGING:-0}"
 SKIP_CERTBOT="${SKIP_CERTBOT:-0}"
+PROMO_AUTH_ENABLE="${PROMO_AUTH_ENABLE:-0}"
+PROMO_AUTH_REALM="${PROMO_AUTH_REALM:-Promo Redemption}"
+PROMO_AUTH_USER_FILE="${PROMO_AUTH_USER_FILE:-/etc/nginx/.htpasswd_promo}"
 
 # Remote web root
 WEB_ROOT="${WEB_ROOT:-/var/www/${DOMAIN}/html}"
@@ -117,6 +120,9 @@ WEB_ROOT="$WEB_ROOT"
 LE_EMAIL="$LE_EMAIL"
 SKIP_CERTBOT="$SKIP_CERTBOT"
 CERTBOT_STAGING="$CERTBOT_STAGING"
+PROMO_AUTH_ENABLE="$PROMO_AUTH_ENABLE"
+PROMO_AUTH_REALM="$PROMO_AUTH_REALM"
+PROMO_AUTH_USER_FILE="$PROMO_AUTH_USER_FILE"
 
 sudo mkdir -p "\$WEB_ROOT"
 sudo chown -R www-data:www-data "\$(dirname "\$WEB_ROOT")"
@@ -132,6 +138,17 @@ if [[ "\$SKIP_CERTBOT" != "1" ]] && ! command -v certbot >/dev/null 2>&1; then
   sudo apt-get install -y certbot python3-certbot-nginx
 fi
 
+if [[ "\$PROMO_AUTH_ENABLE" == "1" && ! -f "\$PROMO_AUTH_USER_FILE" ]]; then
+  echo "Promo auth file not found: \$PROMO_AUTH_USER_FILE" >&2
+  echo "Create it with: sudo htpasswd -c \$PROMO_AUTH_USER_FILE <username>" >&2
+  exit 1
+fi
+
+promo_auth_lines=""
+if [[ "\$PROMO_AUTH_ENABLE" == "1" ]]; then
+  promo_auth_lines="      auth_basic \"\$PROMO_AUTH_REALM\";\n      auth_basic_user_file \$PROMO_AUTH_USER_FILE;"
+fi
+
 sudo tee "/etc/nginx/sites-available/\$DOMAIN" >/dev/null <<NGINX
 server {
     listen 80;
@@ -142,7 +159,8 @@ server {
     index index.html;
 
     location ^~ /promo/ {
-      try_files \\$uri \\$uri/ /promo/index.html;
+\$(printf '%b\n' "\$promo_auth_lines")
+      try_files \\\$uri \\\$uri/ /promo/index.html;
     }
 
     location / {

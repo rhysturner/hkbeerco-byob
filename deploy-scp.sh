@@ -32,6 +32,9 @@ REMOTE_NGINX_SITE="${REMOTE_NGINX_SITE:-/etc/nginx/sites-available/brrrr.app}"
 PROMO_ROUTE_PREFIX="${PROMO_ROUTE_PREFIX:-/hkbeerco/byob/promo/}"
 PROMO_ROUTE_FALLBACK="${PROMO_ROUTE_FALLBACK:-/hkbeerco/byob/promo/index.html}"
 PROMO_ROUTE_AUTH_OFF="${PROMO_ROUTE_AUTH_OFF:-1}"
+PROMO_AUTH_ENABLE="${PROMO_AUTH_ENABLE:-0}"
+PROMO_AUTH_REALM="${PROMO_AUTH_REALM:-Promo Redemption}"
+PROMO_AUTH_USER_FILE="${PROMO_AUTH_USER_FILE:-/etc/nginx/.htpasswd_promo}"
 PROMO_ROUTE_STRICT="${PROMO_ROUTE_STRICT:-0}"
 VERIFY_PROMO_ROUTE="${VERIFY_PROMO_ROUTE:-1}"
 VERIFY_PROMO_BASE_URL="${VERIFY_PROMO_BASE_URL:-https://brrrr.app/hkbeerco/byob/promo}"
@@ -88,6 +91,10 @@ Optional variables:
   PROMO_ROUTE_FALLBACK  Fallback file for dynamic promo paths
                         (default: /hkbeerco/byob/promo/index.html)
   PROMO_ROUTE_AUTH_OFF  Add auth_basic off in promo location block (default: 1)
+  PROMO_AUTH_ENABLE  Protect /promo/* with basic auth (default: 0)
+  PROMO_AUTH_REALM  Basic auth realm for /promo/* (default: "Promo Redemption")
+  PROMO_AUTH_USER_FILE  Remote htpasswd file for /promo/*
+                        (default: /etc/nginx/.htpasswd_promo)
   PROMO_ROUTE_STRICT  Fail deploy if promo route config step fails (default: 0)
   VERIFY_PROMO_ROUTE  Run post-deploy promo URL check (default: 1)
   VERIFY_PROMO_BASE_URL  Promo base URL without trailing code
@@ -197,52 +204,84 @@ REMOTE_NGINX_SITE="$REMOTE_NGINX_SITE"
 PROMO_ROUTE_PREFIX="$PROMO_ROUTE_PREFIX"
 PROMO_ROUTE_FALLBACK="$PROMO_ROUTE_FALLBACK"
 PROMO_ROUTE_AUTH_OFF="$PROMO_ROUTE_AUTH_OFF"
+PROMO_AUTH_ENABLE="$PROMO_AUTH_ENABLE"
+PROMO_AUTH_REALM="$PROMO_AUTH_REALM"
+PROMO_AUTH_USER_FILE="$PROMO_AUTH_USER_FILE"
 
 if [[ ! -f "\$REMOTE_NGINX_SITE" ]]; then
   echo "Nginx site file not found: \$REMOTE_NGINX_SITE" >&2
   exit 1
 fi
 
-if sudo grep -Fq "location ^~ \$PROMO_ROUTE_PREFIX" "\$REMOTE_NGINX_SITE"; then
-  sudo nginx -t >/dev/null
-  sudo systemctl reload nginx
-  exit 0
+if [[ "\$PROMO_AUTH_ENABLE" == "1" && ! -f "\$PROMO_AUTH_USER_FILE" ]]; then
+  echo "Promo auth file not found: \$PROMO_AUTH_USER_FILE" >&2
+  echo "Create it with: sudo htpasswd -c \$PROMO_AUTH_USER_FILE <username>" >&2
+  exit 1
 fi
 
 tmp_file=\$(mktemp)
 awk \
   -v routePrefix="\$PROMO_ROUTE_PREFIX" \
   -v routeFallback="\$PROMO_ROUTE_FALLBACK" \
-  -v authOff="\$PROMO_ROUTE_AUTH_OFF" '
+  -v authOff="\$PROMO_ROUTE_AUTH_OFF" \
+  -v authEnable="\$PROMO_AUTH_ENABLE" \
+  -v authRealm="\$PROMO_AUTH_REALM" \
+  -v authUserFile="\$PROMO_AUTH_USER_FILE" '
+  function print_block() {
+    print "    location ^~ " routePrefix " {"
+    if (authEnable == "1") {
+      print "        auth_basic \"" authRealm "\";"
+      print "        auth_basic_user_file " authUserFile ";"
+    } else if (authOff == "1") {
+      print "        auth_basic off;"
+    }
+    print "        try_files " sprintf("%c", 36) "uri " sprintf("%c", 36) "uri/ " routeFallback ";"
+    print "    }"
+  }
+
+  function delta_braces(line,    a, b, opens, closes) {
+    a = line
+    b = line
+    opens = gsub(/\{/, "{", a)
+    closes = gsub(/\}/, "}", b)
+    return opens - closes
+  }
+
   {
     lines[NR] = \$0
   }
   END {
+    i = 1
     inserted = 0
-    for (i = 1; i <= NR; i++) {
-      if (!inserted && i == NR && lines[i] ~ /^[[:space:]]*}[[:space:]]*$/) {
-        print "    location ^~ " routePrefix " {"
-        if (authOff == "1") {
-          print "        auth_basic off;"
-        }
-        print "        try_files \\\$uri \\\$uri/ " routeFallback ";"
-        print "    }"
+    replaced = 0
+    while (i <= NR) {
+      if (!replaced && index(lines[i], "location ^~ " routePrefix " {") > 0) {
+        print_block()
+        replaced = 1
+        depth = 0
+        do {
+          depth += delta_braces(lines[i])
+          i++
+        } while (i <= NR && depth > 0)
+        continue
+      }
+
+      if (!replaced && !inserted && i == NR && lines[i] ~ /^[[:space:]]*}[[:space:]]*$/) {
+        print_block()
         inserted = 1
       }
+
       print lines[i]
+      i++
     }
 
-    if (!inserted) {
+    if (!replaced && !inserted) {
       print ""
-      print "location ^~ " routePrefix " {"
-      if (authOff == "1") {
-        print "    auth_basic off;"
-      }
-      print "    try_files \\\$uri \\\$uri/ " routeFallback ";"
-      print "}"
+      print_block()
     }
   }
-' "\$REMOTE_NGINX_SITE" > "\$tmp_file"
+' \
+  "\$REMOTE_NGINX_SITE" > "\$tmp_file"
 
 sudo mv "\$tmp_file" "\$REMOTE_NGINX_SITE"
 sudo nginx -t

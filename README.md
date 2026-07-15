@@ -115,6 +115,9 @@ Important `.env.deploy` variables:
 	- `PROMO_ROUTE_PREFIX` (default `/hkbeerco/byob/promo/`)
 	- `PROMO_ROUTE_FALLBACK` (default `/hkbeerco/byob/promo/index.html`)
 	- `PROMO_ROUTE_AUTH_OFF` (default `1`)
+	- `PROMO_AUTH_ENABLE` (default `0`)
+	- `PROMO_AUTH_REALM` (default `Promo Redemption`)
+	- `PROMO_AUTH_USER_FILE` (default `/etc/nginx/.htpasswd_promo`)
 	- `PROMO_ROUTE_STRICT` (default `0`)
 - Promo verification:
 	- `VERIFY_PROMO_ROUTE` (default `1`)
@@ -163,9 +166,25 @@ Important `.env.byob` variables:
 
 - SSH: `REMOTE_USER`, `REMOTE_HOST`, `SSH_PORT`, `SSH_KEY`
 - Domain/SSL: `DOMAIN`, `WWW_DOMAIN`, `LE_EMAIL`, `SKIP_CERTBOT`, `CERTBOT_STAGING`
+- Promo auth (optional): `PROMO_AUTH_ENABLE`, `PROMO_AUTH_REALM`, `PROMO_AUTH_USER_FILE`
 - Paths/payload: `WEB_ROOT`, `SOURCE_FILE`, `TARGET_HTML`, `ASSET_DIRS`
 - Permissions: `REMOTE_FILE_CHMOD`, `REMOTE_DIR_CHMOD`
 - Toggles: `SKIP_SERVER_SETUP`, `SKIP_UPLOAD`
+
+To password-protect `/promo/*` on the live domain:
+
+```sh
+# on server
+sudo htpasswd -c /etc/nginx/.htpasswd_promo your-username
+```
+
+Then set in `.env.byob`:
+
+```sh
+PROMO_AUTH_ENABLE=1
+PROMO_AUTH_REALM="Promo Redemption"
+PROMO_AUTH_USER_FILE=/etc/nginx/.htpasswd_promo
+```
 
 Useful runs:
 
