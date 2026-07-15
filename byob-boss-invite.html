@@ -759,15 +759,13 @@
       'Oh by the way, because you\'re coming with me, we\'ll both get a free Hong Kong Beer.',
       'Food for thought.',
       'HK Beer: Show this invite at the bar to claim your free beer.',
-      'See you then.',
-      'Promo Footer: ' + (promoCode || 'N/A') + ' | ' + (promoUrl || 'N/A'),
-      'Promo QR Base64: ' + (promoQrBase64 || 'N/A')
+      'See you then.'
     ];
 
     const bodyText = bodyParagraphs.join('\r\n\r\n');
     let bodyOutlook = bodyParagraphs.join('<br><br>');
     if(promoQrBase64){
-      bodyOutlook += '<br><br><strong>Promo QR (Base64 image)</strong><br><img src="' + promoQrBase64 + '" alt="Promo QR" width="96" height="96">';
+      bodyOutlook += '<br><br><strong>Promo QR</strong><br><img src="' + promoQrBase64 + '" alt="Promo QR" width="96" height="96">';
     }
 
     // Google Calendar: &add= attaches a guest directly to the event being created.
