@@ -67,6 +67,30 @@
 
   .field{ margin-bottom: 18px; }
   .field-row{ display: grid; grid-template-columns: 1fr; gap: 14px; }
+  .mode-toggle{
+    display: inline-grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  .mode-toggle-btn{
+    min-height: 46px;
+    border: 1px solid rgba(255, 69, 34, 0.35);
+    background: rgba(0,0,0,0.18);
+    color: var(--cream);
+    font-family: 'Anton BYOB', 'Anton', sans-serif;
+    text-transform: uppercase;
+    font-size: 20px;
+    line-height: 1;
+    padding: 10px 12px 8px;
+    cursor: pointer;
+  }
+  .mode-toggle-btn.active{
+    border-color: var(--ember);
+    background: rgba(213, 0, 1, 0.2);
+    color: #fff;
+  }
   label{
     display: block;
     font-family: 'Anton BYOB', 'Anton', sans-serif;
@@ -460,11 +484,9 @@
 
 <div class="wrap">
 
-  <div class="field-row">
-    <div class="field">
-      <label for="bossName">Boss Name</label>
-      <input type="text" id="bossName" placeholder="e.g. Sarah Johnson">
-    </div>
+  <div class="field">
+    <label for="bossName">Boss Name</label>
+    <input type="text" id="bossName" placeholder="e.g. Sarah Johnson">
   </div>
 
   <div class="field">
@@ -482,10 +504,13 @@
   </div>
 
   <div class="field">
-    <label for="venue">Bar / Venue <span class="hint" style="display:inline; margin:0;">(required)</span></label>
+    <div class="mode-toggle" role="group" aria-label="Location mode">
+      <button type="button" class="mode-toggle-btn active" id="modeBar" aria-pressed="true">Bar / Venue</button>
+      <button type="button" class="mode-toggle-btn" id="modeVirtual" aria-pressed="false">Virtual</button>
+    </div>
+    <label for="venue" id="venueLabel">Bar / Venue <span class="hint" style="display:inline; margin:0;">(required)</span></label>
     <select id="venue" required>
       <option value="" selected disabled>Select your venue</option>
-      <option value="Virtual">Virtual</option>
       <option value="The Globe, SoHo">The Globe, SoHo</option>
       <option value="The Pontiac, Central">The Pontiac, Central</option>
       <option value="Draft Land, Central">Draft Land, Central</option>
@@ -493,7 +518,7 @@
       <option value="The Ale Project, Prince Edward">The Ale Project, Prince Edward</option>
       <option value="Ping Pong 129, Sai Ying Pun">Ping Pong 129, Sai Ying Pun</option>
     </select>
-    <span class="hint">Choose the actual bar. This venue is used for invite creation and redemption check-off lists.</span>
+    <span class="hint" id="venueHint">Choose the actual bar. This venue is used for invite creation and redemption check-off lists.</span>
     <a href="#" id="venueMapLink" target="_blank" rel="noopener" style="display:none; margin-top:8px; font-size:12.5px; color:var(--ember); text-decoration:none; font-weight:600;">📍 View on Google Maps →</a>
   </div>
 
@@ -548,9 +573,15 @@
     return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(place);
   }
   const venueInput = document.getElementById('venue');
+  const venueLabel = document.getElementById('venueLabel');
+  const venueHint = document.getElementById('venueHint');
   const venueMapLink = document.getElementById('venueMapLink');
+  const modeBarBtn = document.getElementById('modeBar');
+  const modeVirtualBtn = document.getElementById('modeVirtual');
   const topicInput = document.getElementById('topic');
   const topicCustomInput = document.getElementById('topicCustom');
+  let meetingMode = 'bar';
+  let lastBarVenue = '';
   function syncTopicInput(){
     const useCustomTopic = topicInput.value === '__custom__';
     topicCustomInput.style.display = useCustomTopic ? 'block' : 'none';
@@ -562,17 +593,65 @@
   topicInput.addEventListener('change', syncTopicInput);
   syncTopicInput();
 
+  function setMeetingMode(mode){
+    meetingMode = mode;
+    const isVirtual = mode === 'virtual';
+
+    modeBarBtn.classList.toggle('active', !isVirtual);
+    modeVirtualBtn.classList.toggle('active', isVirtual);
+    modeBarBtn.setAttribute('aria-pressed', String(!isVirtual));
+    modeVirtualBtn.setAttribute('aria-pressed', String(isVirtual));
+
+    venueLabel.innerHTML = isVirtual
+      ? 'Virtual <span class="hint" style="display:inline; margin:0;">(required)</span>'
+      : 'Bar / Venue <span class="hint" style="display:inline; margin:0;">(required)</span>';
+
+    venueHint.textContent = isVirtual
+      ? 'Virtual selected. Invite location will be set to Virtual.'
+      : 'Choose the actual bar. This venue is used for invite creation and redemption check-off lists.';
+
+    if(isVirtual){
+      lastBarVenue = venueInput.value || lastBarVenue;
+      venueInput.style.display = 'none';
+      venueInput.required = false;
+    } else {
+      venueInput.style.display = '';
+      venueInput.required = true;
+      if(!venueInput.value && lastBarVenue){
+        venueInput.value = lastBarVenue;
+      }
+    }
+
+    syncVenueMapLink();
+  }
+
+  modeBarBtn.addEventListener('click', function(){ setMeetingMode('bar'); });
+  modeVirtualBtn.addEventListener('click', function(){ setMeetingMode('virtual'); });
+
   function syncVenueMapLink(){
+    if(meetingMode === 'virtual'){
+      venueMapLink.textContent = 'Virtual';
+      venueMapLink.removeAttribute('href');
+      venueMapLink.removeAttribute('target');
+      venueMapLink.style.display = 'inline-block';
+      venueMapLink.style.pointerEvents = 'none';
+      return;
+    }
+
     const v = venueInput.value.trim();
     if(v){
+      venueMapLink.textContent = '📍 View on Google Maps →';
       venueMapLink.href = mapsUrl(v);
+      venueMapLink.target = '_blank';
       venueMapLink.style.display = 'inline-block';
+      venueMapLink.style.pointerEvents = 'auto';
     } else {
       venueMapLink.style.display = 'none';
     }
   }
   venueInput.addEventListener('input', syncVenueMapLink);
   venueInput.addEventListener('change', syncVenueMapLink);
+  setMeetingMode('bar');
 
   // ---- calendar selector ----
   let selectedCal = 'outlook-work';
@@ -597,7 +676,7 @@
     const bossName = document.getElementById('bossName').value.trim() || 'there';
     const selectedTopic = topicInput.value;
     const topic = selectedTopic === '__custom__' ? topicCustomInput.value.trim() : selectedTopic;
-    const venue = document.getElementById('venue').value;
+    const venue = meetingMode === 'virtual' ? 'Virtual' : venueInput.value;
 
     if(!selectedTopic){
       setStatus('Please select a meeting topic before creating the event.');
@@ -611,7 +690,7 @@
       return;
     }
 
-    if(!venue){
+    if(meetingMode !== 'virtual' && !venue){
       setStatus('Please select a venue before creating the event.');
       venueInput.focus();
       return;
