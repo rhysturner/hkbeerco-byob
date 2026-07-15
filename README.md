@@ -15,24 +15,34 @@ There is no backend, build step, or package manager. The site is deployed by cop
 
 - Single-page static microsite with inline CSS/JS in `byob-boss-invite.html`.
 - Mobile-first responsive form layout (single column on small screens, two columns on larger screens).
-- Required dropdowns for:
-	- Meeting Topic (`#topic`) with preset options and a custom fallback field (`#topicCustom`).
-	- Venue (`#venue`) with fixed bar options.
-- Optional fields:
-	- Boss Name (`#bossName`) defaults to `there`.
-	- Boss Email (`#bossEmail`) controls whether attendees are auto-attached.
-	- Pre-template Event Details (`#note`) appends a final extra paragraph.
+- Age gate (18+) plus Promotion Terms modal before main interaction.
+- Form inputs:
+	- Boss Name (`#bossName`) is optional and defaults to `there`.
+	- Meeting Topic (`#topic`) is required with a custom fallback field (`#topicCustom`) when `(write your own)` is selected.
+	- Location mode toggle supports `Bar / Venue` and `Virtual`.
+	- Venue (`#venue`) is required in bar mode and hidden in virtual mode.
+	- Time field is shown in bar mode and hidden/blank in virtual mode.
 - Calendar options:
 	- Google Calendar
 	- Outlook.com (personal)
 	- Outlook (work/school)
 	- Desktop App (`.ics` download)
-- Tracking attendee rule:
-	- `hkbeerco@proton.me` is only added when Boss Email is present.
+- Venue map link behavior:
+	- In bar mode, `#venueMapLink` points to Google Maps for the selected venue.
+	- In virtual mode, map link text shows `Virtual` and is non-clickable.
+- Promo code and URL mapping:
+	- `Central: Belly and the Beer` -> `BAB852` -> `https://byob-hkbeer.co/promo/BAB852/`
+	- `Wan Chai: Hoppy Junction` -> `HJT852` -> `https://byob-hkbeer.co/promo/HJT852/`
+	- `Prince Edward: HANDS` -> `HND852` -> `https://byob-hkbeer.co/promo/HND852/`
+	- `Kennedy Town: Smash'd Burger` -> `SMB852` -> `https://byob-hkbeer.co/promo/SMB852/`
+	- `KT HK Beer Co` -> `KTH852` -> `https://byob-hkbeer.co/promo/KTH852/`
+	- `Virtual` -> `VIR852` -> `https://byob-hkbeer.co/promo/VIR852/`
 - Invite body formatting:
 	- Paragraph-based template with blank lines.
+	- Separate copy variants for bar mode vs virtual mode.
 	- Plain text body used for Google/ICS.
 	- HTML `<br><br>` body used for Outlook deep links.
+	- Outlook note appends a `Promo QR` image generated at runtime from the promo URL and embedded as a base64 data URL.
 
 ## Repo Structure
 
@@ -109,7 +119,7 @@ scp -P 2222 -i ~/.ssh/your-key byob-boss-invite.html user@example.com:/var/www/h
 
 ## Operations
 
-Live server details, Nginx auth notes, and troubleshooting steps are in [ops/server-notes.md](/Users/rhysturner/Development/Publicis/hk-beer-co/ops/server-notes.md).
+Live server details, Nginx auth notes, and troubleshooting steps are in [ops/server-notes.md](ops/server-notes.md).
 
 That file covers:
 
@@ -131,11 +141,17 @@ That file covers:
 2. Validate topic flow:
 	- Preset topic selected.
 	- `(write your own)` selected and custom value required.
-3. Validate guest flow:
-	- Without Boss Email: no attendees auto-added.
-	- With Boss Email: boss + `hkbeerco@proton.me` auto-added.
-4. Validate venue flow:
-	- Venue is required.
-	- Map link appears after venue selection.
-5. Validate `.ics` file content:
-	- Includes boss attendee and HK Beer attendee only when boss email exists.
+3. Validate location mode flow:
+	- Bar mode: venue dropdown visible and required; time field visible.
+	- Virtual mode: venue dropdown hidden; time field hidden and blank.
+4. Validate venue map link behavior:
+	- Bar mode: map link opens selected venue in Google Maps.
+	- Virtual mode: link displays `Virtual` and is non-clickable.
+5. Validate promo mapping:
+	- Each venue maps to its expected promo code and URL.
+	- Virtual maps to `VIR852`.
+6. Validate note copy behavior:
+	- Bar mode uses bar-focused invite copy.
+	- Virtual mode uses virtual-specific invite copy.
+7. Validate Outlook note rendering:
+	- `Promo QR` heading appears with embedded QR image.

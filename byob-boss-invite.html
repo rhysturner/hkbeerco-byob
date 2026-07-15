@@ -511,16 +511,17 @@
     <label for="venue" id="venueLabel">Bar / Venue <span class="hint" style="display:inline; margin:0;">(required)</span></label>
     <select id="venue" required>
       <option value="" selected disabled>Select your venue</option>
-      <option value="The Globe, SoHo">The Globe, SoHo</option>
-      <option value="The Pontiac, Central">The Pontiac, Central</option>
-      <option value="Draft Land, Central">Draft Land, Central</option>
-      <option value="The Madhouse Taproom, Mong Kok">The Madhouse Taproom, Mong Kok</option>
+      <option value="Central: Belly and the Beer">Central: Belly and the Beer @bellyandthebeerhk</option>
+      <option value="Wan Chai: Hoppy Junction">Wan Chai: Hoppy Junction @hoppyjunctiontap.hk</option>
+      <option value="Prince Edward: HANDS">Prince Edward: HANDS @handsbarhk</option>
+      <option value="Kennedy Town: Smash'd Burger">Kennedy Town: Smash'd Burger @smashd.hk</option>
+      <option value="KT HK Beer Co">KT HK Beer Co</option>
     </select>
     <span class="hint" id="venueHint">Choose the actual bar. This venue is used for invite creation and redemption check-off lists.</span>
     <a href="#" id="venueMapLink" target="_blank" rel="noopener" style="display:none; margin-top:8px; font-size:12.5px; color:var(--ember); text-decoration:none; font-weight:600;">📍 View on Google Maps →</a>
   </div>
 
-  <div class="field">
+  <div class="field" id="timeField">
     <label for="time">Time</label>
     <input type="text" id="time" value="Tuesday, 20 July 2026, 03:00 am - 05:00am" readonly>
   </div>
@@ -565,6 +566,7 @@
   }
   const fixedStart = new Date(2026, 6, 20, 3, 0, 0);  // Tue Jul 20, 3:00 AM
   const fixedEnd = new Date(2026, 6, 20, 5, 0, 0);    // Tue Jul 20, 5:00 AM
+  const barTimeLabel = 'Tuesday, 20 July 2026, 03:00 am - 05:00am';
 
   // ---- venue -> Google Maps link, live as you type ----
   function mapsUrl(place){
@@ -572,10 +574,11 @@
   }
   const PROMO_BASE_URL = 'https://byob-hkbeer.co/promo/';
   const PROMO_CODES_BY_LOCATION = {
-    'The Globe, SoHo': 'TGS852',
-    'The Pontiac, Central': 'TPC852',
-    'Draft Land, Central': 'DLC852',
-    'The Madhouse Taproom, Mong Kok': 'MTM852',
+    'Central: Belly and the Beer': 'BAB852',
+    'Wan Chai: Hoppy Junction': 'HJT852',
+    'Prince Edward: HANDS': 'HND852',
+    "Kennedy Town: Smash'd Burger": 'SMB852',
+    'KT HK Beer Co': 'KTH852',
     'Virtual': 'VIR852'
   };
 
@@ -592,6 +595,8 @@
   const venueLabel = document.getElementById('venueLabel');
   const venueHint = document.getElementById('venueHint');
   const venueMapLink = document.getElementById('venueMapLink');
+  const timeField = document.getElementById('timeField');
+  const timeInput = document.getElementById('time');
   const modeBarBtn = document.getElementById('modeBar');
   const modeVirtualBtn = document.getElementById('modeVirtual');
   const topicInput = document.getElementById('topic');
@@ -630,12 +635,16 @@
       lastBarVenue = venueInput.value || lastBarVenue;
       venueInput.style.display = 'none';
       venueInput.required = false;
+      timeField.style.display = 'none';
+      timeInput.value = '';
     } else {
       venueInput.style.display = '';
       venueInput.required = true;
       if(!venueInput.value && lastBarVenue){
         venueInput.value = lastBarVenue;
       }
+      timeField.style.display = '';
+      timeInput.value = barTimeLabel;
     }
 
     syncVenueMapLink();
@@ -751,16 +760,25 @@
     }
 
     const subject = topic + ' — hosted by Hong Kong Beer';
-    const bodyParagraphs = [
-      'Hi ' + bossName,
-      'Hope this email finds you well. I\'d like to discuss ' + topic + ' out of the office at ' + venue + ' at 3am. It just so happens to be the World Cup Final. What a coincidence, am I right?',
-      'We can talk about how we\'re moving forward on ' + topic + '.',
-      'We probably won\'t. But we can.',
-      'Oh by the way, because you\'re coming with me, we\'ll both get a free Hong Kong Beer.',
-      'Food for thought.',
-      'HK Beer: Show this invite at the bar to claim your free beer.',
-      'See you then.'
-    ];
+    const bodyParagraphs = meetingMode === 'virtual'
+      ? [
+        'Hi ' + bossName,
+        'Hope this email finds you well. I\'d like to discuss ' + topic + ' virtually during the World Cup Final window.',
+        'We can use this session to align on next steps for ' + topic + '.',
+        'No venue needed, just join online and we\'ll keep it focused.',
+        'HK Beer note: Promo eligibility requires a participating bar venue selection.',
+        'See you online.'
+      ]
+      : [
+        'Hi ' + bossName,
+        'Hope this email finds you well. I\'d like to discuss ' + topic + ' out of the office at ' + venue + ' at 3am. It just so happens to be the World Cup Final. What a coincidence, am I right?',
+        'We can talk about how we\'re moving forward on ' + topic + '.',
+        'We probably won\'t. But we can.',
+        'Oh by the way, because you\'re coming with me, we\'ll both get a free Hong Kong Beer.',
+        'Food for thought.',
+        'HK Beer: Show this invite at the bar to claim your free beer.',
+        'See you then.'
+      ];
 
     const bodyText = bodyParagraphs.join('\r\n\r\n');
     let bodyOutlook = bodyParagraphs.join('<br><br>');
