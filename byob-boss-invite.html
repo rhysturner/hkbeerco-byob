@@ -635,10 +635,10 @@
     <label for="venue" id="venueLabel">Bar / Venue <span class="hint" id="venueLabelHint" style="display:inline; margin:0;">(required)</span></label>
     <select id="venue" required>
       <option value="" selected disabled>Select your venue</option>
-      <option value="Central: Belly and the Beer">Central: Belly and the Beer @bellyandthebeerhk</option>
-      <option value="Wan Chai: Hoppy Junction">Wan Chai: Hoppy Junction @hoppyjunctiontap.hk</option>
-      <option value="Prince Edward: HANDS">Prince Edward: HANDS @handsbarhk</option>
-      <option value="Kennedy Town: Smash'd Burger">Kennedy Town: Smash'd Burger @smashd.hk</option>
+      <option value="Central: Belly and the Beer">Central: Belly and the Beer</option>
+      <option value="Wan Chai: Hoppy Junction">Wan Chai: Hoppy Junction</option>
+      <option value="Prince Edward: HANDS">Prince Edward: HANDS</option>
+      <option value="Kennedy Town: Smash'd Burger">Kennedy Town: Smash'd Burger</option>
     </select>
     <span class="hint" id="venueHint">Choose the actual bar. This venue is used for invite creation and redemption check-off lists.</span>
     <a href="#" id="venueMapLink" target="_blank" rel="noopener" style="display:none; margin-top:8px; font-size:12.5px; color:var(--ember); text-decoration:none; font-weight:600;">📍 View on Google Maps →</a>
@@ -672,7 +672,7 @@
   <div class="hint" id="outlookHelp1" style="margin: -14px 0 6px;">Not sure which Outlook? If your email ends in @outlook.com or @hotmail.com, pick "personal." If it's a company email through Microsoft 365, pick "work/school" — picking the wrong one is what causes the sign-in loop.</div>
   <div class="hint" id="outlookHelp2" style="margin: 0 0 20px;">Want it to open straight in the Outlook desktop app instead of the browser? Pick "Desktop App (.ics)" — it skips the web sign-in entirely and opens whatever calendar app is set as default on your computer.</div>
 
-  <button class="generate-btn" id="addEventBtn">Add Event</button>
+  <button type="button" class="generate-btn" id="addEventBtn">Add Event</button>
   <div class="disclaimer" id="disclaimerOne">This opens your calendar's own "new event" screen,  the time already blocked, the venue already selected, and the message already written. You just add the guest and hit save, the same way you normally would. 
 We do not have access to your own calendar. We do not collect or sell personal identifying information.
 </div>
@@ -707,6 +707,7 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
   }
   const PROMO_BASE_PATH = 'promo/';
   const BOSS_BREWERY_ADDRESS = 'Unit A, Ground Floor, Wang Kwong Industrial Building, 45 Hung To Rd, Kwun Tong';
+  const VIRTUAL_MAP_URL = 'https://maps.app.goo.gl/hyuQBwh5i3sA9fty9?g_st=iw';
   const PROMO_CODES_BY_LOCATION = {
     'Central: Belly and the Beer': 'BAB852',
     'Wan Chai: Hoppy Junction': 'HJT852',
@@ -789,7 +790,7 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
       venueHintRequiredMode: '(required, this will be used for invite creation and promotion redemption)',
       venuePlaceholder: 'Select your venue',
       venueHelp: 'Choose the actual bar. This venue is used for invite creation and redemption check-off lists.',
-      virtualVenueHelp: 'Arrive at our brewery and collect two beers. One for you. One for your boss.\n\nAddress: Unit A, Ground Floor, Wang Kwong Industrial Building, 45 Hung To Rd, Kwun Tong\n\nOpening Hours: Wednesday — Friday 4 to 6pm',
+      virtualVenueHelp: 'Arrive at our brewery and collect two beers. One for you. One for your boss.\n\nAddress: Unit A, Ground Floor, Wang Kwong Industrial Building, 45 Hung To Rd, Kwun Tong\n\Redemption Period: 17 Jul, Friday 10am to 7pm',
       mapLink: '📍 View on Google Maps →',
       promoDebugLink: '🎟 Promo Debug Link →',
       promoDebugPrefix: '🎟 Promo Debug: ',
@@ -820,11 +821,10 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
       openedOutlookWork: 'Opened in Outlook (work/school). Hit Send there to block your time and send the invite. If it loops to sign-in, use Outlook.com personal or .ics.',
       openedIcs: 'Downloaded .ics. Open it in your desktop calendar app and save to send invites.',
       qrBase64Error: 'Unable to convert QR image to base64.',
-      promoQrFallback: 'Promo QR image: {{promoQrImageUrl}}',
+      promoQrFallback: 'Show this QR code to the bartender to redeem. Click here: {{promoQrImageUrl}}',
       subject: '{{topic}} — hosted by Hong Kong Beer',
       bodyVirtual: [
         'Here\'s your QR code to redeem your two free Hong Kong Beers.',
-        '[INSERT QR CODE]',
         'Arrive at our brewery and collect two beers. One for you. One for your boss.',
         'Address: Unit A, Ground Floor, Wang Kwong Industrial Building, 45 Hung To Rd, Kwun Tong',
         'Opening Hours: Wednesday — Friday 4 to 6pm',
@@ -835,8 +835,7 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
         'Hope this calendar invite finds you well! Let\'s meet to discuss {{topic}} at {{venue}} at 3am. It just so happens to be the World Cup Final. What a coincidence, am I right?',
         'We can talk about how we\'re moving forward on {{topic}} with the TV on quietly in the background.',
         'Oh by the way, Hong Kong Beer Co is providing each of us with a free local craft brew.',
-        'Just some beer for thought.',
-        'We can show this QR code to the bartender to redeem.'
+        'Just some beer for thought.'
       ]
     },
     cn: {
@@ -900,7 +899,7 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
       openedVirtualCode: '已開啟虛擬換領碼頁面。',
       disclaimerOne: '點擊後將直接開啟您行事曆的「新增行程」頁面，時間已為您預留，地點已選定，內容訊息亦已寫妥。您只需像平常一樣，加入受邀對象並點擊儲存即可。\n\n我們無法存取您的個人行事曆，亦絕不收集或轉售任何個人識別資料。',
       disclaimerTwo: '只需出示由 BYOB 網頁自動產生的 QR Code，即可進行兌換。',
-      disclaimerThree: 'HONG KONG BEER CO · 自1995年起連繫人與人',
+      disclaimerThree: 'HONG KONG BEER CO · 紮根香港自1995年',
       footer: 'HONG KONG BEER · 請理性飲酒 · 你老闆點開前就會見到呢個',
       statusSelectTopic: '請先選擇會議主題再建立活動。',
       statusWriteCustomTopic: '請填寫你的自訂會議主題。',
@@ -910,7 +909,7 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
       openedOutlookWork: '已於 Outlook（工作/學校）開啟。請按「傳送」以鎖定時間並發送邀請。如頁面跳轉至登入畫面，請改用 Outlook.com 個人版或 .ics。',
       openedIcs: '已下載 .ics 檔案。請於桌面日曆應用程式開啟並儲存以發送邀請。',
       qrBase64Error: '無法將 QR 圖片轉換為 base64。',
-      promoQrFallback: '推廣 QR 圖片：{{promoQrImageUrl}}',
+      promoQrFallback: 'Show this QR code to the bartender to redeem. Click here: {{promoQrImageUrl}}',
       subject: '{{topic}} — 由 Hong Kong Beer 主辦',
       bodyVirtual: [
         '你好，{{bossName}}',
@@ -1154,7 +1153,7 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
 
     if(meetingMode === 'virtual'){
       venueMapLink.textContent = copy.mapLink;
-      venueMapLink.href = mapsUrl(BOSS_BREWERY_ADDRESS);
+      venueMapLink.href = VIRTUAL_MAP_URL;
       venueMapLink.target = '_blank';
       venueMapLink.style.display = 'inline-block';
       venueMapLink.style.pointerEvents = 'auto';
@@ -1241,7 +1240,12 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
     return blobToDataUrl(qrBlob);
   }
 
-  document.getElementById('addEventBtn').addEventListener('click', async function(){
+  document.getElementById('addEventBtn').addEventListener('click', async function(event){
+    if(event){
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
     const copy = COPY[currentLanguage];
     const isVirtual = meetingMode === 'virtual';
     const bossName = document.getElementById('bossName').value.trim() || copy.defaultBossName;
@@ -1275,17 +1279,20 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
       return;
     }
 
+    const ua = navigator.userAgent || '';
+    const isSafariBrowser = /safari/i.test(ua) && !/chrome|crios|android|edg|edgios|fxios/i.test(ua);
+
     const opensWebCalendar = selectedCal === 'google'
       || selectedCal === 'outlook-personal'
       || selectedCal === 'outlook-work';
-    const popupWindow = opensWebCalendar ? window.open('', '_blank') : null;
+    const popupWindow = opensWebCalendar && !isSafariBrowser ? window.open('', '_blank') : null;
 
     const mapLink = mapsUrl(venue);
     const promoCode = promoCodeForLocation(venue);
     const promoUrl = promoUrlForLocation(venue);
     const promoQrImageUrl = promoQrImageUrlForLocation(venue);
     let promoQrBase64 = '';
-    const needsOutlookInlineQr = selectedCal === 'outlook-personal' || selectedCal === 'outlook-work';
+    const needsOutlookInlineQr = (selectedCal === 'outlook-personal' || selectedCal === 'outlook-work') && !isSafariBrowser;
     if(needsOutlookInlineQr){
       try{
         promoQrBase64 = await promoQrBase64DataUrl(promoUrl);
@@ -1306,9 +1313,9 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
     // Google Calendar accepts plain LF newlines more consistently for details.
     const bodyText = bodyParagraphs.join('\n\n');
     let bodyOutlook = bodyParagraphs.join('<br><br>');
-    if(promoQrBase64){
-      bodyOutlook += '<br><br><strong>Promo QR</strong><br><img src="' + promoQrBase64 + '" alt="Promo QR" width="96" height="96">';
-    }
+    // if(promoQrBase64){
+    //   bodyOutlook += '<br><br><img src="' + promoQrBase64 + '" alt="Promo QR" width="96" height="96">';
+    // }
 
     // Google Calendar: &add= attaches a guest directly to the event being created.
     // &ctz= pins the exact IANA timezone so the time shown matches what was
@@ -1324,7 +1331,9 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
         location: venue
       });
       const url = 'https://calendar.google.com/calendar/render?' + googleParams.toString();
-      if(popupWindow && !popupWindow.closed){
+      if(isSafariBrowser){
+        window.location.assign(url);
+      } else if(popupWindow && !popupWindow.closed){
         popupWindow.location.href = url;
       } else {
         window.open(url, '_blank', 'noopener');
@@ -1340,7 +1349,9 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
         + '&body=' + encodeURIComponent(bodyOutlook)
         + '&location=' + encodeURIComponent(venue)
         + '&allday=false';
-      if(popupWindow && !popupWindow.closed){
+      if(isSafariBrowser){
+        window.location.assign(url);
+      } else if(popupWindow && !popupWindow.closed){
         popupWindow.location.href = url;
       } else {
         window.open(url, '_blank', 'noopener');
@@ -1356,7 +1367,9 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
         + '&body=' + encodeURIComponent(bodyOutlook)
         + '&location=' + encodeURIComponent(venue)
         + '&allday=false';
-      if(popupWindow && !popupWindow.closed){
+      if(isSafariBrowser){
+        window.location.assign(url);
+      } else if(popupWindow && !popupWindow.closed){
         popupWindow.location.href = url;
       } else {
         window.open(url, '_blank', 'noopener');
