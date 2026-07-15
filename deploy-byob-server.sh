@@ -16,6 +16,9 @@ REMOTE_USER="${REMOTE_USER:-}"
 REMOTE_HOST="${REMOTE_HOST:-}"
 SSH_PORT="${SSH_PORT:-22}"
 SSH_KEY="${SSH_KEY:-}"
+SSH_CONTROL_MASTER="${SSH_CONTROL_MASTER:-1}"
+SSH_CONTROL_PERSIST="${SSH_CONTROL_PERSIST:-10m}"
+SSH_CONTROL_PATH="${SSH_CONTROL_PATH:-$HOME/.ssh/cm-%r@%h:%p}"
 
 # Domain + SSL
 DOMAIN="${DOMAIN:-byob-hkbeer.co}"
@@ -23,6 +26,9 @@ WWW_DOMAIN="${WWW_DOMAIN:-www.byob-hkbeer.co}"
 LE_EMAIL="${LE_EMAIL:-}"
 CERTBOT_STAGING="${CERTBOT_STAGING:-0}"
 SKIP_CERTBOT="${SKIP_CERTBOT:-0}"
+PROMO_AUTH_ENABLE="${PROMO_AUTH_ENABLE:-0}"
+PROMO_AUTH_REALM="${PROMO_AUTH_REALM:-Promo Redemption}"
+PROMO_AUTH_USER_FILE="${PROMO_AUTH_USER_FILE:-/etc/nginx/.htpasswd_promo}"
 
 # Remote web root
 WEB_ROOT="${WEB_ROOT:-/var/www/${DOMAIN}/html}"
@@ -30,7 +36,7 @@ WEB_ROOT="${WEB_ROOT:-/var/www/${DOMAIN}/html}"
 # Deployment payload
 SOURCE_FILE="${SOURCE_FILE:-byob-boss-invite.html}"
 TARGET_HTML="${TARGET_HTML:-index.html}"
-ASSET_DIRS="${ASSET_DIRS:-images fonts}"
+ASSET_DIRS="${ASSET_DIRS:-images fonts promo}"
 REMOTE_FILE_CHMOD="${REMOTE_FILE_CHMOD:-644}"
 REMOTE_DIR_CHMOD="${REMOTE_DIR_CHMOD:-755}"
 
@@ -85,7 +91,19 @@ if [[ -n "$SSH_KEY" ]]; then
   scp_args+=(-i "$SSH_KEY")
 fi
 
+if [[ "$SSH_CONTROL_MASTER" == "1" ]]; then
+  scp_args+=(-o ControlMaster=auto -o "ControlPersist=$SSH_CONTROL_PERSIST" -o "ControlPath=$SSH_CONTROL_PATH")
+  ssh_args+=(-o ControlMaster=auto -o "ControlPersist=$SSH_CONTROL_PERSIST" -o "ControlPath=$SSH_CONTROL_PATH")
+fi
+
 remote_host="$REMOTE_USER@$REMOTE_HOST"
+
+if [[ "$SSH_CONTROL_MASTER" == "1" ]]; then
+  # Prime one SSH connection so later scp/ssh calls reuse it.
+  if ! ssh "${ssh_args[@]}" "$remote_host" "true"; then
+    echo "Warning: Could not pre-establish SSH control master; continuing." >&2
+  fi
+fi
 
 echo "==> Target host: $remote_host"
 echo "==> Domain: $DOMAIN (and $WWW_DOMAIN)"
@@ -102,6 +120,9 @@ WEB_ROOT="$WEB_ROOT"
 LE_EMAIL="$LE_EMAIL"
 SKIP_CERTBOT="$SKIP_CERTBOT"
 CERTBOT_STAGING="$CERTBOT_STAGING"
+PROMO_AUTH_ENABLE="$PROMO_AUTH_ENABLE"
+PROMO_AUTH_REALM="$PROMO_AUTH_REALM"
+PROMO_AUTH_USER_FILE="$PROMO_AUTH_USER_FILE"
 
 sudo mkdir -p "\$WEB_ROOT"
 sudo chown -R www-data:www-data "\$(dirname "\$WEB_ROOT")"
@@ -117,6 +138,17 @@ if [[ "\$SKIP_CERTBOT" != "1" ]] && ! command -v certbot >/dev/null 2>&1; then
   sudo apt-get install -y certbot python3-certbot-nginx
 fi
 
+if [[ "\$PROMO_AUTH_ENABLE" == "1" && ! -f "\$PROMO_AUTH_USER_FILE" ]]; then
+  echo "Promo auth file not found: \$PROMO_AUTH_USER_FILE" >&2
+  echo "Create it with: sudo htpasswd -c \$PROMO_AUTH_USER_FILE <username>" >&2
+  exit 1
+fi
+
+promo_auth_lines=""
+if [[ "\$PROMO_AUTH_ENABLE" == "1" ]]; then
+  promo_auth_lines="      auth_basic \"\$PROMO_AUTH_REALM\";\n      auth_basic_user_file \$PROMO_AUTH_USER_FILE;"
+fi
+
 sudo tee "/etc/nginx/sites-available/\$DOMAIN" >/dev/null <<NGINX
 server {
     listen 80;
@@ -125,6 +157,11 @@ server {
 
     root \$WEB_ROOT;
     index index.html;
+
+    location ^~ /promo/ {
+\$(printf '%b\n' "\$promo_auth_lines")
+      try_files \\\$uri \\\$uri/ /promo/index.html;
+    }
 
     location / {
       try_files \\\$uri \\\$uri/ =404;
@@ -188,6 +225,10 @@ sudo find "\$WEB_ROOT" -type d -exec chmod "\$REMOTE_DIR_CHMOD" {} +
 sudo find "\$WEB_ROOT" -type f -exec chmod "\$REMOTE_FILE_CHMOD" {} +
 sudo chown -R www-data:www-data "\$WEB_ROOT"
 EOF
+fi
+
+if [[ "$SSH_CONTROL_MASTER" == "1" ]]; then
+  ssh "${ssh_args[@]}" -O exit "$remote_host" >/dev/null 2>&1 || true
 fi
 
 echo "==> Done"
