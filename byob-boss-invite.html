@@ -505,8 +505,8 @@
 
   <div class="field">
     <div class="mode-toggle" role="group" aria-label="Location mode">
-      <button type="button" class="mode-toggle-btn active" id="modeBar" aria-pressed="true">Bar / Venue</button>
-      <button type="button" class="mode-toggle-btn" id="modeVirtual" aria-pressed="false">Virtual</button>
+      <button type="button" class="mode-toggle-btn active" id="modeBar" aria-pressed="true">Option 1</button>
+      <button type="button" class="mode-toggle-btn" id="modeVirtual" aria-pressed="false">Option 2</button>
     </div>
     <label for="venue" id="venueLabel">Bar / Venue <span class="hint" style="display:inline; margin:0;">(required)</span></label>
     <select id="venue" required>
@@ -624,11 +624,11 @@
     modeVirtualBtn.setAttribute('aria-pressed', String(isVirtual));
 
     venueLabel.innerHTML = isVirtual
-      ? 'Virtual <span class="hint" style="display:inline; margin:0;">(required)</span>'
+      ? 'Click and Collect <span class="hint" style="display:inline; margin:0;">(required)</span>'
       : 'Bar / Venue <span class="hint" style="display:inline; margin:0;">(required)</span>';
 
     venueHint.textContent = isVirtual
-      ? 'Virtual selected. Invite location will be set to Virtual.'
+      ? 'Click and Collect a beer for your boss. Go to a participating venue and show them the QR code to redeem.'
       : 'Choose the actual bar. This venue is used for invite creation and redemption check-off lists.';
 
     if(isVirtual){
