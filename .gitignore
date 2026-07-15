@@ -1,4 +1,6 @@
 .DS_Store
 .env.deploy
 .env.deploy.local
+.env.byob
+.env.byob.local
 *.psd

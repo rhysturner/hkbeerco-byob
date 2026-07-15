@@ -465,10 +465,6 @@
       <label for="bossName">Boss Name</label>
       <input type="text" id="bossName" placeholder="e.g. Sarah Johnson">
     </div>
-    <div class="field">
-      <label for="bossEmail">Boss Email <span class="hint" style="display:inline; margin:0;">(optional)</span></label>
-      <input type="email" id="bossEmail" placeholder="e.g. sarah.johnson@example.com">
-    </div>
   </div>
 
   <div class="field">
@@ -489,6 +485,7 @@
     <label for="venue">Bar / Venue <span class="hint" style="display:inline; margin:0;">(required)</span></label>
     <select id="venue" required>
       <option value="" selected disabled>Select your venue</option>
+      <option value="Virtual">Virtual</option>
       <option value="The Globe, SoHo">The Globe, SoHo</option>
       <option value="The Pontiac, Central">The Pontiac, Central</option>
       <option value="Draft Land, Central">Draft Land, Central</option>
@@ -502,7 +499,7 @@
 
   <div class="field">
     <label for="time">Time</label>
-    <input type="text" id="time" value="Monday, 19 July 2026, 03:00 am - 05:00am" readonly>
+    <input type="text" id="time" value="Tuesday, 20 July 2026, 03:00 am - 05:00am" readonly>
   </div>
 
   <div class="section-label">Select Calendar</div>
@@ -528,9 +525,8 @@
   <div class="hint" style="margin: 0 0 20px;">Want it to open straight in the Outlook desktop app instead of the browser? Pick "Desktop App (.ics)" — it skips the web sign-in entirely and opens whatever calendar app is set as default on your computer.</div>
 
   <button class="generate-btn" id="addEventBtn">Add Event</button>
-  <div class="hint" style="margin: 10px 0 0;">By creating an invite with a guest email, you consent to adding hkbeerco@proton.me as a copy recipient for redemption/admin verification.</div>
-  <div class="disclaimer">This opens your calendar's own "new event" screen — your boss's email already added as a guest, the message already written, the time already blocked. You just hit save, the same way you normally would.</div>
-  <div class="disclaimer" style="margin-top: 8px;">Free beer claims are manually validated at the venue by matching attendee email and event topic/time against HK Beer CO invite records for that selected bar.</div>
+  <div class="disclaimer">This opens your calendar's own "new event" screen with the message already written, location set, and time already blocked. You just hit save, the same way you normally would.</div>
+  <div class="disclaimer" style="margin-top: 8px;">Free beer claims are manually validated at the venue by matching event topic/time against HK Beer CO invite records for that selected bar.</div>
   <div class="status" id="status"></div>
 
 </div>
@@ -539,14 +535,13 @@
 
 <script>
 (function(){
-  const TRACKING_EMAIL = 'hkbeerco@proton.me';
   // ---- default date/time: night of the World Cup final ----
   function pad(n){ return String(n).padStart(2,'0'); }
   function toLocalInputValue(d){
     return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
   }
-  const fixedStart = new Date(2026, 6, 19, 3, 0, 0);  // Mon Jul 19, 3:00 AM
-  const fixedEnd = new Date(2026, 6, 19, 5, 0, 0);    // Mon Jul 19, 5:00 AM
+  const fixedStart = new Date(2026, 6, 20, 3, 0, 0);  // Tue Jul 20, 3:00 AM
+  const fixedEnd = new Date(2026, 6, 20, 5, 0, 0);    // Tue Jul 20, 5:00 AM
 
   // ---- venue -> Google Maps link, live as you type ----
   function mapsUrl(place){
@@ -600,7 +595,6 @@
   }
   document.getElementById('addEventBtn').addEventListener('click', function(){
     const bossName = document.getElementById('bossName').value.trim() || 'there';
-    const bossEmail = document.getElementById('bossEmail').value.trim();
     const selectedTopic = topicInput.value;
     const topic = selectedTopic === '__custom__' ? topicCustomInput.value.trim() : selectedTopic;
     const venue = document.getElementById('venue').value;
@@ -623,9 +617,6 @@
       return;
     }
 
-    const attendees = [];
-    if(bossEmail) attendees.push(bossEmail);
-    if(bossEmail) attendees.push(TRACKING_EMAIL);
     const mapLink = mapsUrl(venue);
     const subject = topic + ' — hosted by Hong Kong Beer';
     const bodyParagraphs = [
@@ -653,7 +644,6 @@
         + '&ctz=' + encodeURIComponent(tz)
         + '&details=' + encodeURIComponent(bodyText)
         + '&location=' + encodeURIComponent(venue);
-      if(attendees.length) url += '&add=' + encodeURIComponent(attendees.join(','));
       window.open(url, '_blank', 'noopener');
       setStatus('Opened in Google Calendar. Hit Save there to block your time and send the invite.');
     }
@@ -666,7 +656,6 @@
         + '&body=' + encodeURIComponent(bodyOutlook)
         + '&location=' + encodeURIComponent(venue)
         + '&allday=false';
-      if(attendees.length) url += '&to=' + encodeURIComponent(attendees.join(';'));
       window.open(url, '_blank', 'noopener');
       setStatus('Opened in Outlook.com. Hit Send there to block your time and send the invite. If it loops to sign-in, use the work/school option or .ics.');
     }
@@ -679,14 +668,12 @@
         + '&body=' + encodeURIComponent(bodyOutlook)
         + '&location=' + encodeURIComponent(venue)
         + '&allday=false';
-      if(attendees.length) url += '&to=' + encodeURIComponent(attendees.join(';'));
       window.open(url, '_blank', 'noopener');
       setStatus('Opened in Outlook (work/school). Hit Send there to block your time and send the invite. If it loops to sign-in, use Outlook.com personal or .ics.');
     }
-    // Other calendars: .ics with the boss listed as an ATTENDEE. Apple Calendar,
-    // Outlook desktop, etc. will offer to notify attendees when you save it.
+    // Other calendars: download an .ics file for manual calendar import.
     else{
-      downloadIcs({ bossName, bossEmail, subject, body: bodyText, venue, start: fixedStart, end: fixedEnd, topic, mapLink, attendees });
+      downloadIcs({ subject, body: bodyText, venue, start: fixedStart, end: fixedEnd, topic, mapLink });
       setStatus('Downloaded .ics. Open it in your desktop calendar app and save to send invites.');
     }
   });
@@ -706,10 +693,6 @@
       'LOCATION:' + invite.venue,
       'ORGANIZER:mailto:noreply@hongkongbeer.example'
     ];
-    if(invite.bossEmail){
-      lines.push('ATTENDEE;CN=' + invite.bossName + ';RSVP=TRUE:mailto:' + invite.bossEmail);
-      lines.push('ATTENDEE;CN=HK Beer CO;RSVP=FALSE:mailto:' + TRACKING_EMAIL);
-    }
     lines.push('STATUS:CONFIRMED','TRANSP:OPAQUE','END:VEVENT','END:VCALENDAR');
     const ics = lines.join('\r\n');
     const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
