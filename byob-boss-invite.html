@@ -710,10 +710,11 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
     if(!code){
       return '';
     }
+    // Use a known public base when previewing from file://, otherwise resolve from current page.
     const baseHref = window.location.protocol === 'file:'
-      ? 'https://byob-hkbeer.co/'
+      ? 'https://brrrr.app/hkbeerco/byob/'
       : window.location.href;
-    return new URL(PROMO_BASE_PATH + 'qr/' + code + '.png', baseHref).href;
+    return new URL('images/qr/' + code + '.png', baseHref).href;
   }
 
   const COPY = {
