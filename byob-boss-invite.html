@@ -526,7 +526,7 @@
 </head>
 <body>
 
-<div><div class="hulk_age_verify" id="hulk_age_verify"><div class="back_imge template-1 " id="preview_img"><div class="preview_box"> <section class="preview_box_section"><div class="preview_box_wrap">  <div class="logo" style="background-color: #ffffff;"><img src="https://dr8h81twidjpw.cloudfront.net/uploads/popup_setting/popup_logo_img/hkbererco_140x_2010270232.png" alt=""></div> <h2 class="pre_title" id="preview_header_text" style="font-weight: 700;">Are you 18 years of age or older?</h2><p class="pre_contain" id="preview_sub_header_text" style="font-weight: 400;"> Under the law of Hong Kong, intoxicating liquor must not be sold or supplied to a minor in the course of business.      根據香港法律，不得在業務過程中，向未成年人售賣或供應令人醺醉的酒類。</p> <div class="preview_btn" style="background-color:  transparent ;"><span class="main-box-bg" style="border-top-color:#ffffff;"></span><div class="agree"> <button type="button" data-verified="true" class="agree_btn btn_verified" id="ageYesText"><span>YES</span></button></div><div class="disagree" style="margin-left:15px;"> <button type="button" data-verified="false" class="disagree_btn btn_verified" id="btn_disabled"><span id="ageNoText">NO</span></button></div></div></div> </section></div><div class="av_overlay"></div></div></div></div>
+<div><div class="hulk_age_verify" id="hulk_age_verify"><div class="back_imge template-1 " id="preview_img"><div class="preview_box"> <section class="preview_box_section"><div class="preview_box_wrap">  <div class="logo" style="background-color: #ffffff;"><img src="https://dr8h81twidjpw.cloudfront.net/uploads/popup_setting/popup_logo_img/hkbererco_140x_2010270232.png" alt=""></div> <h2 class="pre_title" id="preview_header_text" style="font-weight: 700;">Are you 18 years of age or older?<br>你已滿 18 歲嗎？</h2><p class="pre_contain" id="preview_sub_header_text" style="font-weight: 400;"> Under the law of Hong Kong, intoxicating liquor must not be sold or supplied to a minor in the course of business.<br>根據香港法律，不得在業務過程中，向未成年人售賣或供應令人醺醉的酒類。</p> <div class="preview_btn" style="background-color:  transparent ;"><span class="main-box-bg" style="border-top-color:#ffffff;"></span><div class="agree"> <button type="button" data-verified="true" class="agree_btn btn_verified" id="ageYesText"><span>YES / 是</span></button></div><div class="disagree" style="margin-left:15px;"> <button type="button" data-verified="false" class="disagree_btn btn_verified" id="btn_disabled"><span id="ageNoText">NO / 否</span></button></div></div></div> </section></div><div class="av_overlay"></div></div></div></div>
 
 <div class="promo-terms" id="promoTerms" aria-hidden="true">
   <div class="promo-terms__overlay"></div>
@@ -970,10 +970,7 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
     langEnBtn.setAttribute('aria-pressed', String(language === 'en'));
     langCnBtn.setAttribute('aria-pressed', String(language === 'cn'));
 
-    previewHeaderText.textContent = copy.ageTitle;
-    previewSubHeaderText.textContent = copy.ageSubtitle;
-    ageYesText.textContent = copy.ageYes;
-    ageNoText.textContent = copy.ageNo;
+    // Age gate text is intentionally always bilingual and not language-toggled.
 
     // Terms modal is intentionally always bilingual and not language-toggled.
 
