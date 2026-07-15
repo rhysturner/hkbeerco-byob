@@ -27,11 +27,42 @@
   body{
     background: #6E1514;
     color: var(--cream);
-    font-family: Avenir, 'Avenir Next', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: Avenir, 'Avenir Next', 'Helvetica Neue', Helvetica, Arial, sans-serif, 'PingFang SC', 'Microsoft YaHei', sans-serif;
     line-height: 1.45;
+  }
+  body.lang-cn{
+    font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', sans-serif;
   }
   .display{ font-family: 'Anton BYOB', 'Anton', sans-serif; text-transform: uppercase; }
   .mono{ font-family: 'Space Mono', monospace; }
+
+  body.lang-cn .mode-toggle-btn,
+  body.lang-cn label,
+  body.lang-cn .section-label,
+  body.lang-cn .generate-btn,
+  body.lang-cn .promo-terms__title,
+  body.lang-cn .promo-terms__btn,
+  body.lang-cn .lang-switch__btn,
+  body.lang-cn .promo-terms__subtitle,
+  body.lang-cn .hero-copy,
+  body.lang-cn .hint,
+  body.lang-cn .copy,
+  body.lang-cn .footer,
+  body.lang-cn .status,
+  body.lang-cn .disclaimer,
+  body.lang-cn .label,
+  body.lang-cn .value{
+    font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', sans-serif;
+  }
+  body.lang-cn label,
+  body.lang-cn .section-label,
+  body.lang-cn .generate-btn,
+  body.lang-cn .promo-terms__title,
+  body.lang-cn .promo-terms__btn,
+  body.lang-cn .lang-switch__btn{
+    text-transform: none;
+    letter-spacing: 0;
+  }
 
   .hero{
     background: #000;
@@ -68,6 +99,43 @@
   .hero-copy-mobile{ display: none; }
 
   .wrap{ max-width: 760px; margin: 0 auto; padding: 30px 20px 72px; }
+
+  .lang-switch{
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    display: inline-flex;
+    gap: 0;
+    width: auto;
+    z-index: 40;
+    border-radius: 999px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(0, 0, 0, 0.28);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+  }
+  .lang-switch__btn{
+    min-height: 42px;
+    min-width: 56px;
+    border: none;
+    background: transparent;
+    color: var(--cream);
+    font-family: 'Anton BYOB', 'Anton', sans-serif;
+    text-transform: uppercase;
+    font-size: 16px;
+    line-height: 1;
+    padding: 11px 16px 10px;
+    cursor: pointer;
+  }
+  .lang-switch__btn.active{
+    background: rgba(213, 0, 1, 0.32);
+    color: #fff;
+  }
+
+  .lang-switch__btn + .lang-switch__btn{
+    border-left: 1px solid rgba(255, 255, 255, 0.12);
+  }
 
   .field{ margin-bottom: 18px; }
   .field-row{ display: grid; grid-template-columns: 1fr; gap: 14px; }
@@ -438,36 +506,48 @@
     }
     .hero-copy-desktop{ display: none; }
     .hero-copy-mobile{ display: inline; }
+
+    .lang-switch{
+      right: 16px;
+      bottom: 16px;
+    }
+
+    .lang-switch__btn{
+      min-height: 38px;
+      min-width: 50px;
+      font-size: 15px;
+      padding: 10px 14px 9px;
+    }
   }
 </style>
 </head>
 <body>
 
-<div><div class="hulk_age_verify" id="hulk_age_verify"><div class="back_imge template-1 " id="preview_img"><div class="preview_box"> <section class="preview_box_section"><div class="preview_box_wrap">  <div class="logo" style="background-color: #ffffff;"><img src="https://dr8h81twidjpw.cloudfront.net/uploads/popup_setting/popup_logo_img/hkbererco_140x_2010270232.png" alt=""></div> <h2 class="pre_title" id="preview_header_text" style="font-weight: 700;">Are you 18 years of age or older?</h2><p class="pre_contain" id="preview_sub_header_text" style="font-weight: 400;"> Under the law of Hong Kong, intoxicating liquor must not be sold or supplied to a minor in the course of business.      根據香港法律，不得在業務過程中，向未成年人售賣或供應令人醺醉的酒類。</p> <div class="preview_btn" style="background-color:  transparent ;"><span class="main-box-bg" style="border-top-color:#ffffff;"></span><div class="agree"> <button type="button" data-verified="true" class="agree_btn btn_verified"><span>YES</span></button></div><div class="disagree" style="margin-left:15px;"> <button type="button" data-verified="false" class="disagree_btn btn_verified" id="btn_disabled"><span>NO</span></button></div></div></div> </section></div><div class="av_overlay"></div></div></div></div>
+<div><div class="hulk_age_verify" id="hulk_age_verify"><div class="back_imge template-1 " id="preview_img"><div class="preview_box"> <section class="preview_box_section"><div class="preview_box_wrap">  <div class="logo" style="background-color: #ffffff;"><img src="https://dr8h81twidjpw.cloudfront.net/uploads/popup_setting/popup_logo_img/hkbererco_140x_2010270232.png" alt=""></div> <h2 class="pre_title" id="preview_header_text" style="font-weight: 700;">Are you 18 years of age or older?</h2><p class="pre_contain" id="preview_sub_header_text" style="font-weight: 400;"> Under the law of Hong Kong, intoxicating liquor must not be sold or supplied to a minor in the course of business.      根據香港法律，不得在業務過程中，向未成年人售賣或供應令人醺醉的酒類。</p> <div class="preview_btn" style="background-color:  transparent ;"><span class="main-box-bg" style="border-top-color:#ffffff;"></span><div class="agree"> <button type="button" data-verified="true" class="agree_btn btn_verified" id="ageYesText"><span>YES</span></button></div><div class="disagree" style="margin-left:15px;"> <button type="button" data-verified="false" class="disagree_btn btn_verified" id="btn_disabled"><span id="ageNoText">NO</span></button></div></div></div> </section></div><div class="av_overlay"></div></div></div></div>
 
 <div class="promo-terms" id="promoTerms" aria-hidden="true">
   <div class="promo-terms__overlay"></div>
   <div class="promo-terms__dialog" role="dialog" aria-modal="true" aria-labelledby="promoTermsTitle">
     <div class="promo-terms__header">
       <h2 class="promo-terms__title" id="promoTermsTitle">Promotion Terms &amp; Conditions</h2>
-      <p class="promo-terms__subtitle">BYOB: Bring Your Own Boss - Hong Kong Beer promotion</p>
+      <p class="promo-terms__subtitle" id="promoTermsSubtitle">BYOB: Bring Your Own Boss - Hong Kong Beer promotion</p>
     </div>
     <div class="promo-terms__body">
-      <p>By continuing, you confirm you understand and accept the terms for this promotion.</p>
+      <p id="promoTermsIntro">By continuing, you confirm you understand and accept the terms for this promotion.</p>
       <ol class="promo-terms__list">
-        <li>This promotion is open to persons aged 18+ only. Valid photo ID may be required at redemption.</li>
-        <li>Invite creation must be completed through this BYOB page using a real email, selected venue, topic, and event time.</li>
-        <li>Free beer redemption is checked manually against HK Beer records and your event details (including attendee email, selected venue, and event context).</li>
-        <li>One free beer redemption per verified attendee, per eligible invite, unless otherwise stated by HK Beer.</li>
-        <li>Redemption is available only at participating venues and only while stocks last. Venue availability and service times apply.</li>
-        <li>Offer is non-transferable, non-exchangeable, and not redeemable for cash or credit.</li>
-        <li>HK Beer may verify entries and may refuse, suspend, or cancel claims that are incomplete, misleading, duplicate, abusive, or not compliant with these terms.</li>
-        <li>HK Beer may amend, pause, or end this promotion where reasonably required, including stock limits, operational constraints, or legal requirements.</li>
-        <li>Please drink responsibly. Under Hong Kong law, intoxicating liquor must not be sold or supplied to a minor in the course of business.</li>
+        <li id="promoTerm1">This promotion is open to persons aged 18+ only. Valid photo ID may be required at redemption.</li>
+        <li id="promoTerm2">Invite creation must be completed through this BYOB page using a real email, selected venue, topic, and event time.</li>
+        <li id="promoTerm3">Free beer redemption is checked manually against HK Beer records and your event details (including attendee email, selected venue, and event context).</li>
+        <li id="promoTerm4">One free beer redemption per verified attendee, per eligible invite, unless otherwise stated by HK Beer.</li>
+        <li id="promoTerm5">Redemption is available only at participating venues and only while stocks last. Venue availability and service times apply.</li>
+        <li id="promoTerm6">Offer is non-transferable, non-exchangeable, and not redeemable for cash or credit.</li>
+        <li id="promoTerm7">HK Beer may verify entries and may refuse, suspend, or cancel claims that are incomplete, misleading, duplicate, abusive, or not compliant with these terms.</li>
+        <li id="promoTerm8">HK Beer may amend, pause, or end this promotion where reasonably required, including stock limits, operational constraints, or legal requirements.</li>
+        <li id="promoTerm9">Please drink responsibly. Under Hong Kong law, intoxicating liquor must not be sold or supplied to a minor in the course of business.</li>
       </ol>
       <label class="promo-terms__confirm" for="promoTermsConfirm">
         <input type="checkbox" id="promoTermsConfirm">
-        <span>I am 18 or older and I agree to the Promotion Terms &amp; Conditions above.</span>
+        <span id="promoTermsConfirmText">I am 18 or older and I agree to the Promotion Terms &amp; Conditions above.</span>
       </label>
     </div>
     <div class="promo-terms__actions">
@@ -484,17 +564,22 @@
     <img class="hero-media" src="images/BYOB_Microsite_header_1.png" alt="BYOB Microsite header art">
   </video>
   <div class="hero-copy">
-    <span class="hero-copy-desktop">Kickoff at 3am. Work at 9am. One fix? Bring your own boss. Foster team bonding with a fresh local craft brew.
+    <span class="hero-copy-desktop" id="heroCopyDesktop">Kickoff at 3am. Work at 9am. One fix? Bring your own boss. Foster team bonding with a fresh local craft brew.
 </span>
-    <span class="hero-copy-mobile">Kickoff at 3am. Work at 9am. One fix? Bring your own boss. Foster team bonding with a fresh local craft brew.
+    <span class="hero-copy-mobile" id="heroCopyMobile">Kickoff at 3am. Work at 9am. One fix? Bring your own boss. Foster team bonding with a fresh local craft brew.
 </span>
   </div>
 </div>
 
 <div class="wrap">
 
+  <div class="lang-switch" role="tablist" aria-label="Language selector">
+    <button type="button" class="lang-switch__btn active" id="langEnBtn" aria-pressed="true">EN</button>
+    <button type="button" class="lang-switch__btn" id="langCnBtn" aria-pressed="false">CN</button>
+  </div>
+
   <div class="field">
-    <label for="bossName">Boss Name</label>
+    <label for="bossName" id="bossNameLabel">Boss Name</label>
     <input type="text" id="bossName" placeholder="e.g. Sarah J.">
   </div>
 
@@ -506,7 +591,7 @@
 </button>
     </div>
     <div id="topicField">
-      <label for="topic">Meeting Topic <span class="hint" style="display:inline; margin:0;">(the corporate-sounding cover story)</span></label>
+      <label for="topic" id="topicLabel">Meeting Topic <span class="hint" id="topicHint" style="display:inline; margin:0;">(the corporate-sounding cover story)</span></label>
       <select id="topic" required>
         <option value="" selected disabled>Select meeting topic</option>
         <option value="Q3 Planning Sync">Q3 Planning Sync</option>
@@ -517,7 +602,7 @@
       </select>
       <input type="text" id="topicCustom" placeholder="Write your own meeting topic" style="display:none; margin-top:10px;">
     </div>
-    <label for="venue" id="venueLabel">Bar / Venue <span class="hint" style="display:inline; margin:0;">(required)</span></label>
+    <label for="venue" id="venueLabel">Bar / Venue <span class="hint" id="venueLabelHint" style="display:inline; margin:0;">(required)</span></label>
     <select id="venue" required>
       <option value="" selected disabled>Select your venue</option>
       <option value="Central: Belly and the Beer">Central: Belly and the Beer @bellyandthebeerhk</option>
@@ -532,40 +617,40 @@
   </div>
 
   <div class="field" id="timeField">
-    <label for="time">Time</label>
+    <label for="time" id="timeLabel">Time</label>
     <input type="text" id="time" value="Monday, 20 July 2026, 03:00 am - 05:00am" readonly>
   </div>
 
-  <div class="section-label">Select Calendar</div>
+  <div class="section-label" id="calendarSectionLabel">Select Calendar</div>
   <div class="cal-options">
-    <div class="cal-option" data-cal="google">
+    <div class="cal-option" data-cal="google" id="calGoogle">
       <span class="radio-dot"></span>
       Google Calendar
     </div>
-    <div class="cal-option" data-cal="ics">
+    <div class="cal-option" data-cal="ics" id="calIcs">
       <span class="radio-dot"></span>
       Desktop App <span class="hint" style="display:inline; margin:0 0 0 4px;">(.ics)</span>
     </div>
-    <div class="cal-option" data-cal="outlook-personal">
+    <div class="cal-option" data-cal="outlook-personal" id="calOutlookPersonal">
       <span class="radio-dot"></span>
       Outlook.com <span class="hint" style="display:inline; margin:0 0 0 4px;">(personal)</span>
     </div>
-    <div class="cal-option active" data-cal="outlook-work">
+    <div class="cal-option active" data-cal="outlook-work" id="calOutlookWork">
       <span class="radio-dot"></span>
       Outlook <span class="hint" style="display:inline; margin:0 0 0 4px;">(work/school)</span>
     </div>
   </div>
-  <div class="hint" style="margin: -14px 0 6px;">Not sure which Outlook? If your email ends in @outlook.com or @hotmail.com, pick "personal." If it's a company email through Microsoft 365, pick "work/school" — picking the wrong one is what causes the sign-in loop.</div>
-  <div class="hint" style="margin: 0 0 20px;">Want it to open straight in the Outlook desktop app instead of the browser? Pick "Desktop App (.ics)" — it skips the web sign-in entirely and opens whatever calendar app is set as default on your computer.</div>
+  <div class="hint" id="outlookHelp1" style="margin: -14px 0 6px;">Not sure which Outlook? If your email ends in @outlook.com or @hotmail.com, pick "personal." If it's a company email through Microsoft 365, pick "work/school" — picking the wrong one is what causes the sign-in loop.</div>
+  <div class="hint" id="outlookHelp2" style="margin: 0 0 20px;">Want it to open straight in the Outlook desktop app instead of the browser? Pick "Desktop App (.ics)" — it skips the web sign-in entirely and opens whatever calendar app is set as default on your computer.</div>
 
   <button class="generate-btn" id="addEventBtn">Add Event</button>
-  <div class="disclaimer">This opens your calendar's own "new event" screen,  the time already blocked, the venue already selected, and the message already written. You just add the guest and hit save, the same way you normally would. 
+  <div class="disclaimer" id="disclaimerOne">This opens your calendar's own "new event" screen,  the time already blocked, the venue already selected, and the message already written. You just add the guest and hit save, the same way you normally would. 
 We do not have access to your own calendar. We do not collect or sell personal identifying information.
 </div>
-<div class="disclaimer" style="margin-top: 8px;">
+<div class="disclaimer" id="disclaimerTwo" style="margin-top: 8px;">
   Redemption is via QR Code automatically generated from BYOB page.
 </div>
-<div class="disclaimer" style="margin-top: 8px;">
+<div class="disclaimer" id="disclaimerThree" style="margin-top: 8px;">
 HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
 </div>
 
@@ -574,7 +659,7 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
 
 </div>
 
-<footer>HONG KONG BEER &nbsp;&middot;&nbsp; DRINK RESPONSIBLY &nbsp;&middot;&nbsp; YOUR BOSS CAN SEE THIS BEFORE THEY CLICK</footer>
+<footer id="footerCopy">HONG KONG BEER &nbsp;&middot;&nbsp; DRINK RESPONSIBLY &nbsp;&middot;&nbsp; YOUR BOSS CAN SEE THIS BEFORE THEY CLICK</footer>
 
 <script>
 (function(){
@@ -614,18 +699,319 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
     return new URL(PROMO_BASE_PATH + code + '/', window.location.href).href;
   }
 
-  const venueInput = document.getElementById('venue');
+  const COPY = {
+    en: {
+      ageTitle: 'Are you 18 years of age or older?',
+      ageSubtitle: 'Under the law of Hong Kong, intoxicating liquor must not be sold or supplied to a minor in the course of business.',
+      ageYes: 'YES',
+      ageNo: 'NO',
+      promoTermsTitle: 'Promotion Terms & Conditions',
+      promoTermsSubtitle: 'BYOB: Bring Your Own Boss - Hong Kong Beer promotion',
+      promoTermsIntro: 'By continuing, you confirm you understand and accept the terms for this promotion.',
+      promoTerms: [
+        'This promotion is open to persons aged 18+ only. Valid photo ID may be required at redemption.',
+        'Invite creation must be completed through this BYOB page using a real email, selected venue, topic, and event time.',
+        'Free beer redemption is checked manually against HK Beer records and your event details (including attendee email, selected venue, and event context).',
+        'One free beer redemption per verified attendee, per eligible invite, unless otherwise stated by HK Beer.',
+        'Redemption is available only at participating venues and only while stocks last. Venue availability and service times apply.',
+        'Offer is non-transferable, non-exchangeable, and not redeemable for cash or credit.',
+        'HK Beer may verify entries and may refuse, suspend, or cancel claims that are incomplete, misleading, duplicate, abusive, or not compliant with these terms.',
+        'HK Beer may amend, pause, or end this promotion where reasonably required, including stock limits, operational constraints, or legal requirements.',
+        'Please drink responsibly. Under Hong Kong law, intoxicating liquor must not be sold or supplied to a minor in the course of business.'
+      ],
+      promoTermsConfirm: 'I am 18 or older and I agree to the Promotion Terms & Conditions above.',
+      decline: 'Decline',
+      agreeContinue: 'Agree & Continue',
+      heroCopy: 'Kickoff at 3am. Work at 9am. One fix? Bring your own boss. Foster team bonding with a fresh local craft brew.',
+      defaultBossName: 'there',
+      bossNameLabel: 'Boss Name',
+      bossNamePlaceholder: 'e.g. Sarah J.',
+      modeBar: 'MEET UP FOR THE FINAL',
+      modeVirtual: 'BRING BEER TO YOUR BOSS',
+      topicLabel: 'Meeting Topic',
+      topicHint: '(the corporate-sounding cover story)',
+      topicPlaceholder: 'Select meeting topic',
+      topicCustomPlaceholder: 'Write your own meeting topic',
+      topicOptions: ['Q3 Planning Sync', 'Budgeting Discussion', 'Culture & Alignment Check-in', 'Cross-Team Strategy Review', 'H2 Priorities Catch-up'],
+      venueLabel: 'Bar / Venue',
+      venueLabelVirtual: 'Click and Collect',
+      venueHintRequired: '(required)',
+      venueHintRequiredMode: '(required, this will be used for invite creation and promotion redemption)',
+      venuePlaceholder: 'Select your venue',
+      venueHelp: 'Choose the actual bar. This venue is used for invite creation and redemption check-off lists.',
+      virtualVenueHelp: 'Arrive at our brewery and collect two beers. One for you. One for your boss.\n\nAddress: Unit A, Ground Floor, Wang Kwong Industrial Building, 45 Hung To Rd, Kwun Tong\n\nOpening Hours: Wednesday — Friday 4 to 6pm',
+      mapLink: '📍 View on Google Maps →',
+      promoDebugLink: '🎟 Promo Debug Link →',
+      promoDebugPrefix: '🎟 Promo Debug: ',
+      timeLabel: 'Time',
+      timeValue: 'Monday, 20 July 2026, 03:00 am - 05:00am',
+      calendarSection: 'Select Calendar',
+      calendarGoogle: 'Google Calendar',
+      calendarIcs: 'Desktop App',
+      calendarIcsHint: '(.ics)',
+      calendarOutlookPersonal: 'Outlook.com',
+      calendarOutlookPersonalHint: '(personal)',
+      calendarOutlookWork: 'Outlook',
+      calendarOutlookWorkHint: '(work/school)',
+      outlookHelp1: 'Not sure which Outlook? If your email ends in @outlook.com or @hotmail.com, pick "personal." If it\'s a company email through Microsoft 365, pick "work/school" — picking the wrong one is what causes the sign-in loop.',
+      outlookHelp2: 'Want it to open straight in the Outlook desktop app instead of the browser? Pick "Desktop App (.ics)" — it skips the web sign-in entirely and opens whatever calendar app is set as default on your computer.',
+      addEvent: 'Add Event',
+      disclaimerOne: 'This opens your calendar\'s own "new event" screen, the time already blocked, the venue already selected, and the message already written. You just add the guest and hit save, the same way you normally would. We do not have access to your own calendar. We do not collect or sell personal identifying information.',
+      disclaimerTwo: 'Redemption is via QR Code automatically generated from BYOB page.',
+      disclaimerThree: 'HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995',
+      footer: 'HONG KONG BEER · DRINK RESPONSIBLY · YOUR BOSS CAN SEE THIS BEFORE THEY CLICK',
+      statusSelectTopic: 'Please select a meeting topic before creating the event.',
+      statusWriteCustomTopic: 'Please write your custom meeting topic.',
+      statusSelectVenue: 'Please select a venue before creating the event.',
+      openedGoogle: 'Opened in Google Calendar. Hit Save there to block your time and send the invite.',
+      openedOutlookPersonal: 'Opened in Outlook.com. Hit Send there to block your time and send the invite. If it loops to sign-in, use the work/school option or .ics.',
+      openedOutlookWork: 'Opened in Outlook (work/school). Hit Send there to block your time and send the invite. If it loops to sign-in, use Outlook.com personal or .ics.',
+      openedIcs: 'Downloaded .ics. Open it in your desktop calendar app and save to send invites.',
+      qrBase64Error: 'Unable to convert QR image to base64.',
+      subject: '{{topic}} — hosted by Hong Kong Beer',
+      bodyVirtual: [
+        'Hi {{bossName}}',
+        'Hope this email finds you well. I\'d like to discuss {{topic}} virtually during the World Cup Final window.',
+        'We can use this session to align on next steps for {{topic}}.',
+        'No venue needed, just join online and we\'ll keep it focused.',
+        'HK Beer note: Promo eligibility requires a participating bar venue selection.',
+        'See you online.'
+      ],
+      bodyBar: [
+        'Hi {{bossName}}',
+        'Hope this email finds you well. I\'d like to discuss {{topic}} out of the office at {{venue}} at 3am. It just so happens to be the World Cup Final. What a coincidence, am I right?',
+        'We can talk about how we\'re moving forward on {{topic}}.',
+        'We probably won\'t. But we can.',
+        'Oh by the way, because you\'re coming with me, we\'ll both get a free Hong Kong Beer.',
+        'Food for thought.',
+        'HK Beer: Show this invite at the bar to claim your free beer.',
+        'See you then.'
+      ]
+    },
+    cn: {
+      ageTitle: '你已满 18 岁吗？',
+      ageSubtitle: '根据香港法律，不得在业务过程中，向未成年人售卖或供应令人醺醉的酒类。',
+      ageYes: '是',
+      ageNo: '否',
+      promoTermsTitle: '促销条款及细则',
+      promoTermsSubtitle: 'BYOB：带上你的老板 - 香港啤酒推广活动',
+      promoTermsIntro: '继续操作即表示你确认已理解并接受本次推广活动条款。',
+      promoTerms: [
+        '本推广活动仅限年满18岁人士参加。兑换时可能需要出示有效附照片身份证明。',
+        '邀请函必须通过本 BYOB 页面创建，并使用真实电邮、所选场地、主题及活动时间。',
+        '免费啤酒兑换将根据香港啤酒记录及你的活动详情手动核对（包括出席者电邮、所选场地及活动内容）。',
+        '每位已验证出席者在每个合资格邀请中仅可兑换一杯免费啤酒，除非香港啤酒另有说明。',
+        '兑换仅限参与场地，并视乎库存而定。场地供应及服务时间适用。',
+        '优惠不可转让、不可兑换、不可换取现金或信用额。',
+        '香港啤酒可核实资料，并可拒绝、暂停或取消任何不完整、误导、重复、滥用或不符合本条款的申请。',
+        '香港啤酒可在合理需要下修改、暂停或结束本推广活动，包括库存限制、营运安排或法律要求。',
+        '请理性饮酒。根据香港法律，不得在业务过程中，向未成年人售卖或供应令人醺醉的酒类。'
+      ],
+      promoTermsConfirm: '本人已满18岁，并同意以上促销条款及细则。',
+      decline: '拒绝',
+      agreeContinue: '同意并继续',
+      heroCopy: '凌晨3点开赛，上午9点上班？只需一个办法：带上你的老板。用一杯本地精酿，促进团队感情。',
+      defaultBossName: '你',
+      bossNameLabel: '老板姓名',
+      bossNamePlaceholder: '例如 Sarah J.',
+      modeBar: '一起看决赛',
+      modeVirtual: '给老板带酒',
+      topicLabel: '会议主题',
+      topicHint: '（用于掩饰的公司话术）',
+      topicPlaceholder: '请选择会议主题',
+      topicCustomPlaceholder: '输入你自己的会议主题',
+      topicOptions: ['Q3 季度规划同步', '预算讨论', '文化与协同沟通', '跨团队战略复盘', 'H2 优先事项跟进'],
+      venueLabel: '酒吧 / 场地',
+      venueLabelVirtual: '到店自取',
+      venueHintRequired: '（必填）',
+      venueHintRequiredMode: '（必填，将用于邀请创建及促销兑换）',
+      venuePlaceholder: '请选择场地',
+      venueHelp: '请选择实际酒吧。此场地会用于邀请创建及兑换核对名单。',
+      virtualVenueHelp: '请前往我们的酒厂领取两杯啤酒。一杯给你，一杯给你的老板。\n\n地址：观塘鸿图道45号宏光工业大厦地下A室\n\n营业时间：星期三至五 下午4时至6时',
+      mapLink: '📍 在 Google 地图查看 →',
+      promoDebugLink: '🎟 促销调试链接 →',
+      promoDebugPrefix: '🎟 促销调试：',
+      timeLabel: '时间',
+      timeValue: '2026年7月20日（星期一）凌晨 3:00 - 5:00',
+      calendarSection: '选择日历',
+      calendarGoogle: 'Google 日历',
+      calendarIcs: '桌面应用',
+      calendarIcsHint: '（.ics）',
+      calendarOutlookPersonal: 'Outlook.com',
+      calendarOutlookPersonalHint: '（个人）',
+      calendarOutlookWork: 'Outlook',
+      calendarOutlookWorkHint: '（工作/学校）',
+      outlookHelp1: '不确定该选哪个 Outlook？如果你的邮箱以 @outlook.com 或 @hotmail.com 结尾，请选“个人”。如果是透过 Microsoft 365 的公司邮箱，请选“工作/学校”——选错最容易导致登录循环。',
+      outlookHelp2: '想直接在 Outlook 桌面应用中打开，而不是浏览器？请选择“桌面应用（.ics）”——它会跳过网页登录，直接用电脑默认日历应用打开。',
+      addEvent: '添加活动',
+      disclaimerOne: '这会打开你日历自己的“新建活动”页面，时间已预先阻止，场地已选好，讯息也已写好。你只需加入来宾并点击保存，和你平常的操作一样。我们无法访问你的日历，也不会收集或出售个人识别资料。',
+      disclaimerTwo: '兑换二维码会通过 BYOB 页面自动生成。',
+      disclaimerThree: '香港啤酒有限公司 · 自 1995 年以来连接彼此',
+      footer: '香港啤酒 · 饮酒请理性 · 你的老板会在你点开前看到这个页面',
+      statusSelectTopic: '请先选择会议主题，然后再创建活动。',
+      statusWriteCustomTopic: '请填写你自定义的会议主题。',
+      statusSelectVenue: '请先选择场地，然后再创建活动。',
+      openedGoogle: '已在 Google 日历中打开。请在那边点击保存以预留时间并发送邀请。',
+      openedOutlookPersonal: '已在 Outlook.com 中打开。请在那边点击发送以预留时间并发送邀请。若出现登录循环，请改用工作/学校选项或 .ics。',
+      openedOutlookWork: '已在 Outlook（工作/学校）中打开。请在那边点击发送以预留时间并发送邀请。若出现登录循环，请改用 Outlook.com 个人版或 .ics。',
+      openedIcs: '已下载 .ics 文件。请在桌面日历应用中打开并保存以发送邀请。',
+      qrBase64Error: '无法将二维码图片转换为 base64。',
+      subject: '{{topic}} — 由香港啤酒主办',
+      bodyVirtual: [
+        '你好，{{bossName}}',
+        '希望你一切顺利。我想在世界杯决赛时段以线上方式讨论 {{topic}}。',
+        '我们可以利用这次会议就 {{topic}} 的下一步达成一致。',
+        '无需场地，只需在线加入，我们会保持聚焦。',
+        '香港啤酒提示：如需参与促销，仍须选择合作酒吧场地。',
+        '线上见。'
+      ],
+      bodyBar: [
+        '你好，{{bossName}}',
+        '希望你一切顺利。我想在凌晨3点到 {{venue}} 这个办公室外地点讨论 {{topic}}。刚好还是世界杯决赛时间，真是巧合，对吧？',
+        '我们可以谈谈 {{topic}} 的推进方向。',
+        '虽然大概不会真的推进，但也可以谈谈。',
+        '顺带一提，既然你和我一起去，我们俩都能获得一杯免费的香港啤酒。',
+        '值得思考。',
+        '香港啤酒：请在酒吧出示此邀请以领取免费啤酒。',
+        '到时见。'
+      ]
+    }
+  };
+
+  const langEnBtn = document.getElementById('langEnBtn');
+  const langCnBtn = document.getElementById('langCnBtn');
+  const previewHeaderText = document.getElementById('preview_header_text');
+  const previewSubHeaderText = document.getElementById('preview_sub_header_text');
+  const ageYesText = document.getElementById('ageYesText');
+  const ageNoText = document.getElementById('ageNoText');
+  const promoTermsTitle = document.getElementById('promoTermsTitle');
+  const promoTermsSubtitle = document.getElementById('promoTermsSubtitle');
+  const promoTermsIntro = document.getElementById('promoTermsIntro');
+  const promoTermsConfirmText = document.getElementById('promoTermsConfirmText');
+  const promoTermNodes = [
+    document.getElementById('promoTerm1'),
+    document.getElementById('promoTerm2'),
+    document.getElementById('promoTerm3'),
+    document.getElementById('promoTerm4'),
+    document.getElementById('promoTerm5'),
+    document.getElementById('promoTerm6'),
+    document.getElementById('promoTerm7'),
+    document.getElementById('promoTerm8'),
+    document.getElementById('promoTerm9')
+  ];
+  const promoTermsDeclineBtn = document.getElementById('promoTermsDecline');
+  const promoTermsAgreeBtn = document.getElementById('promoTermsAgree');
+  const heroCopyDesktop = document.getElementById('heroCopyDesktop');
+  const heroCopyMobile = document.getElementById('heroCopyMobile');
+  const bossNameLabel = document.getElementById('bossNameLabel');
+  const topicLabel = document.getElementById('topicLabel');
+  const topicHint = document.getElementById('topicHint');
+  const topicOptions = document.getElementById('topic').options;
+  const topicCustomInput = document.getElementById('topicCustom');
   const venueLabel = document.getElementById('venueLabel');
+  const venueLabelHint = document.getElementById('venueLabelHint');
   const venueHint = document.getElementById('venueHint');
+  const timeLabel = document.getElementById('timeLabel');
+  const calendarSectionLabel = document.getElementById('calendarSectionLabel');
+  const calGoogle = document.getElementById('calGoogle');
+  const calIcs = document.getElementById('calIcs');
+  const calOutlookPersonal = document.getElementById('calOutlookPersonal');
+  const calOutlookWork = document.getElementById('calOutlookWork');
+  const outlookHelp1 = document.getElementById('outlookHelp1');
+  const outlookHelp2 = document.getElementById('outlookHelp2');
+  const addEventBtn = document.getElementById('addEventBtn');
+  const disclaimerOne = document.getElementById('disclaimerOne');
+  const disclaimerTwo = document.getElementById('disclaimerTwo');
+  const disclaimerThree = document.getElementById('disclaimerThree');
+  const footerCopy = document.getElementById('footerCopy');
+  const statusText = document.getElementById('status');
+  const timeInput = document.getElementById('time');
+  const bossNameInput = document.getElementById('bossName');
+  const topicInput = document.getElementById('topic');
+
+  let currentLanguage = 'en';
+
+  function formatTemplate(template, values){
+    return template.replace(/\{\{(\w+)\}\}/g, function(_, key){
+      return Object.prototype.hasOwnProperty.call(values, key) ? values[key] : '';
+    });
+  }
+
+  function applyLanguage(language){
+    currentLanguage = language;
+    const copy = COPY[language];
+
+    document.body.classList.toggle('lang-cn', language === 'cn');
+    langEnBtn.classList.toggle('active', language === 'en');
+    langCnBtn.classList.toggle('active', language === 'cn');
+    langEnBtn.setAttribute('aria-pressed', String(language === 'en'));
+    langCnBtn.setAttribute('aria-pressed', String(language === 'cn'));
+
+    previewHeaderText.textContent = copy.ageTitle;
+    previewSubHeaderText.textContent = copy.ageSubtitle;
+    ageYesText.textContent = copy.ageYes;
+    ageNoText.textContent = copy.ageNo;
+
+    promoTermsTitle.textContent = copy.promoTermsTitle;
+    promoTermsSubtitle.textContent = copy.promoTermsSubtitle;
+    promoTermsIntro.textContent = copy.promoTermsIntro;
+    promoTermNodes.forEach(function(node, index){
+      if(node){
+        node.textContent = copy.promoTerms[index];
+      }
+    });
+    promoTermsConfirmText.textContent = copy.promoTermsConfirm;
+    promoTermsDeclineBtn.textContent = copy.decline;
+    promoTermsAgreeBtn.textContent = copy.agreeContinue;
+
+    heroCopyDesktop.textContent = copy.heroCopy;
+    heroCopyMobile.textContent = copy.heroCopy;
+    bossNameLabel.textContent = copy.bossNameLabel;
+    bossNameInput.placeholder = copy.bossNamePlaceholder;
+    modeBarBtn.textContent = copy.modeBar;
+    modeVirtualBtn.textContent = copy.modeVirtual;
+
+    topicLabel.childNodes[0].textContent = copy.topicLabel + ' ';
+    topicHint.textContent = copy.topicHint;
+    topicOptions[0].text = copy.topicPlaceholder;
+    for(let i = 0; i < copy.topicOptions.length; i += 1){
+      topicOptions[i + 1].text = copy.topicOptions[i];
+    }
+    topicCustomInput.placeholder = copy.topicCustomPlaceholder;
+
+    venueLabel.childNodes[0].textContent = copy.venueLabel + ' ';
+    venueInput.options[0].text = copy.venuePlaceholder;
+    venueLabelHint.textContent = currentLanguage === 'cn' ? copy.venueHintRequiredMode : copy.venueHintRequired;
+    venueHint.textContent = copy.venueHelp;
+
+    timeLabel.textContent = copy.timeLabel;
+    timeInput.value = copy.timeValue;
+
+    calendarSectionLabel.textContent = copy.calendarSection;
+    calGoogle.innerHTML = '<span class="radio-dot"></span>' + copy.calendarGoogle;
+    calIcs.innerHTML = '<span class="radio-dot"></span>' + copy.calendarIcs + ' <span class="hint" style="display:inline; margin:0 0 0 4px;">' + copy.calendarIcsHint + '</span>';
+    calOutlookPersonal.innerHTML = '<span class="radio-dot"></span>' + copy.calendarOutlookPersonal + ' <span class="hint" style="display:inline; margin:0 0 0 4px;">' + copy.calendarOutlookPersonalHint + '</span>';
+    calOutlookWork.innerHTML = '<span class="radio-dot"></span>' + copy.calendarOutlookWork + ' <span class="hint" style="display:inline; margin:0 0 0 4px;">' + copy.calendarOutlookWorkHint + '</span>';
+    outlookHelp1.textContent = copy.outlookHelp1;
+    outlookHelp2.textContent = copy.outlookHelp2;
+
+    addEventBtn.textContent = copy.addEvent;
+    disclaimerOne.textContent = copy.disclaimerOne;
+    disclaimerTwo.textContent = copy.disclaimerTwo;
+    disclaimerThree.textContent = copy.disclaimerThree;
+    footerCopy.innerHTML = copy.footer;
+
+    syncTopicInput();
+    setMeetingMode(meetingMode);
+  }
+
+  const venueInput = document.getElementById('venue');
   const venueMapLink = document.getElementById('venueMapLink');
   const promoDebugLink = document.getElementById('promoDebugLink');
   const timeField = document.getElementById('timeField');
-  const timeInput = document.getElementById('time');
   const modeBarBtn = document.getElementById('modeBar');
   const modeVirtualBtn = document.getElementById('modeVirtual');
   const topicField = document.getElementById('topicField');
-  const topicInput = document.getElementById('topic');
-  const topicCustomInput = document.getElementById('topicCustom');
   let meetingMode = 'bar';
   let lastBarVenue = '';
   function syncTopicInput(){
@@ -643,6 +1029,7 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
   function setMeetingMode(mode){
     meetingMode = mode;
     const isVirtual = mode === 'virtual';
+    const copy = COPY[currentLanguage];
 
     modeBarBtn.classList.toggle('active', !isVirtual);
     modeVirtualBtn.classList.toggle('active', isVirtual);
@@ -650,12 +1037,12 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
     modeVirtualBtn.setAttribute('aria-pressed', String(isVirtual));
 
     venueLabel.innerHTML = isVirtual
-      ? 'Click and Collect <span class="hint" style="display:inline; margin:0;">(required)</span>'
-      : 'Bar / Venue <span class="hint" style="display:inline; margin:0;">(required, this will be used for invite creation and promotion redemption)</span>';
+      ? copy.venueLabelVirtual + ' <span class="hint" style="display:inline; margin:0;">' + copy.venueHintRequired + '</span>'
+      : copy.venueLabel + ' <span class="hint" style="display:inline; margin:0;">' + copy.venueHintRequiredMode + '</span>';
 
     venueHint.textContent = isVirtual
-      ? 'Arrive at our brewery and collect two beers. One for you. One for your boss.\n\nAddress: ' + BOSS_BREWERY_ADDRESS + '\n\nOpening Hours: Wednesday — Friday 4 to 6pm'
-      : 'Choose the actual bar. This venue is used for invite creation and redemption check-off lists.';
+      ? copy.virtualVenueHelp
+      : copy.venueHelp;
     venueHint.style.whiteSpace = isVirtual ? 'pre-line' : '';
 
     if(topicField){
@@ -678,7 +1065,7 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
         venueInput.value = lastBarVenue;
       }
       timeField.style.display = '';
-      timeInput.value = barTimeLabel;
+      timeInput.value = copy.timeValue;
     }
 
     syncVenueMapLink();
@@ -688,12 +1075,13 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
   modeVirtualBtn.addEventListener('click', function(){ setMeetingMode('virtual'); });
 
   function syncVenueMapLink(){
+    const copy = COPY[currentLanguage];
     const location = meetingMode === 'virtual' ? 'Virtual' : venueInput.value.trim();
     const promoCode = promoCodeForLocation(location);
     const promoUrl = promoUrlForLocation(location);
 
     if(promoCode && promoUrl){
-      promoDebugLink.textContent = '🎟 Promo Debug: ' + promoCode + ' →';
+      promoDebugLink.textContent = copy.promoDebugPrefix + promoCode + ' →';
       promoDebugLink.href = promoUrl;
       promoDebugLink.style.display = 'inline-block';
     } else {
@@ -701,7 +1089,7 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
     }
 
     if(meetingMode === 'virtual'){
-      venueMapLink.textContent = '📍 View on Google Maps →';
+      venueMapLink.textContent = copy.mapLink;
       venueMapLink.href = mapsUrl(BOSS_BREWERY_ADDRESS);
       venueMapLink.target = '_blank';
       venueMapLink.style.display = 'inline-block';
@@ -711,7 +1099,7 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
 
     const v = venueInput.value.trim();
     if(v){
-      venueMapLink.textContent = '📍 View on Google Maps →';
+      venueMapLink.textContent = copy.mapLink;
       venueMapLink.href = mapsUrl(v);
       venueMapLink.target = '_blank';
       venueMapLink.style.display = 'inline-block';
@@ -722,7 +1110,10 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
   }
   venueInput.addEventListener('input', syncVenueMapLink);
   venueInput.addEventListener('change', syncVenueMapLink);
+  langEnBtn.addEventListener('click', function(){ applyLanguage('en'); });
+  langCnBtn.addEventListener('click', function(){ applyLanguage('cn'); });
   setMeetingMode('bar');
+  applyLanguage('en');
 
   const heroVideo = document.querySelector('.hero-video');
   if(heroVideo){
@@ -787,25 +1178,26 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
   }
 
   document.getElementById('addEventBtn').addEventListener('click', async function(){
-    const bossName = document.getElementById('bossName').value.trim() || 'there';
+    const copy = COPY[currentLanguage];
+    const bossName = document.getElementById('bossName').value.trim() || copy.defaultBossName;
     const selectedTopic = topicInput.value;
     const topic = selectedTopic === '__custom__' ? topicCustomInput.value.trim() : selectedTopic;
     const venue = meetingMode === 'virtual' ? 'Virtual' : venueInput.value;
 
     if(!selectedTopic){
-      setStatus('Please select a meeting topic before creating the event.');
+      setStatus(copy.statusSelectTopic);
       topicInput.focus();
       return;
     }
 
     if(selectedTopic === '__custom__' && !topic){
-      setStatus('Please write your custom meeting topic.');
+      setStatus(copy.statusWriteCustomTopic);
       topicCustomInput.focus();
       return;
     }
 
     if(meetingMode !== 'virtual' && !venue){
-      setStatus('Please select a venue before creating the event.');
+      setStatus(copy.statusSelectVenue);
       venueInput.focus();
       return;
     }
@@ -820,26 +1212,11 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
       promoQrBase64 = '';
     }
 
-    const subject = topic + ' — hosted by Hong Kong Beer';
-    const bodyParagraphs = meetingMode === 'virtual'
-      ? [
-        'Hi ' + bossName,
-        'Hope this email finds you well. I\'d like to discuss ' + topic + ' virtually during the World Cup Final window.',
-        'We can use this session to align on next steps for ' + topic + '.',
-        'No venue needed, just join online and we\'ll keep it focused.',
-        'HK Beer note: Promo eligibility requires a participating bar venue selection.',
-        'See you online.'
-      ]
-      : [
-        'Hi ' + bossName,
-        'Hope this email finds you well. I\'d like to discuss ' + topic + ' out of the office at ' + venue + ' at 3am. It just so happens to be the World Cup Final. What a coincidence, am I right?',
-        'We can talk about how we\'re moving forward on ' + topic + '.',
-        'We probably won\'t. But we can.',
-        'Oh by the way, because you\'re coming with me, we\'ll both get a free Hong Kong Beer.',
-        'Food for thought.',
-        'HK Beer: Show this invite at the bar to claim your free beer.',
-        'See you then.'
-      ];
+    const subject = formatTemplate(copy.subject, { topic: topic });
+    const bodyTemplates = meetingMode === 'virtual' ? copy.bodyVirtual : copy.bodyBar;
+    const bodyParagraphs = bodyTemplates.map(function(line){
+      return formatTemplate(line, { bossName: bossName, topic: topic, venue: venue });
+    });
 
     const bodyText = bodyParagraphs.join('\r\n\r\n');
     let bodyOutlook = bodyParagraphs.join('<br><br>');
@@ -859,7 +1236,7 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
         + '&details=' + encodeURIComponent(bodyText)
         + '&location=' + encodeURIComponent(venue);
       window.open(url, '_blank', 'noopener');
-      setStatus('Opened in Google Calendar. Hit Save there to block your time and send the invite.');
+      setStatus(copy.openedGoogle);
     }
     // Outlook.com — personal Microsoft accounts (@outlook.com, @hotmail.com, @live.com)
     else if(selectedCal === 'outlook-personal'){
@@ -871,7 +1248,7 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
         + '&location=' + encodeURIComponent(venue)
         + '&allday=false';
       window.open(url, '_blank', 'noopener');
-      setStatus('Opened in Outlook.com. Hit Send there to block your time and send the invite. If it loops to sign-in, use the work/school option or .ics.');
+      setStatus(copy.openedOutlookPersonal);
     }
     // Outlook work/school — Microsoft 365 accounts issued by an organization
     else if(selectedCal === 'outlook-work'){
@@ -883,12 +1260,12 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
         + '&location=' + encodeURIComponent(venue)
         + '&allday=false';
       window.open(url, '_blank', 'noopener');
-      setStatus('Opened in Outlook (work/school). Hit Send there to block your time and send the invite. If it loops to sign-in, use Outlook.com personal or .ics.');
+      setStatus(copy.openedOutlookWork);
     }
     // Other calendars: download an .ics file for manual calendar import.
     else{
       downloadIcs({ subject, body: bodyText, venue, start: fixedStart, end: fixedEnd, topic, mapLink });
-      setStatus('Downloaded .ics. Open it in your desktop calendar app and save to send invites.');
+      setStatus(copy.openedIcs);
     }
   });
 
