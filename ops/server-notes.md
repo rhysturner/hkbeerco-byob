@@ -35,6 +35,15 @@ location ^~ /hkbeerco/byob/ {
 }
 ```
 
+To support dynamic promo redemption URLs like `/hkbeerco/byob/promo/BAB852/`, add:
+
+```nginx
+location ^~ /hkbeerco/byob/promo/ {
+    auth_basic off;
+    try_files $uri $uri/ /hkbeerco/byob/promo/index.html;
+}
+```
+
 That means most of `brrrr.app` is still behind basic auth, but `https://brrrr.app/hkbeerco/byob/` is public.
 
 ## Updating Basic Auth

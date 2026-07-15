@@ -5,8 +5,10 @@
 This repo contains a single-file static microsite for the BYOB campaign.
 
 - Main app: `byob-boss-invite.html`
-- Deployment helper: `deploy-scp.sh`
-- Local deploy template: `.env.deploy.example`
+- Promo redeem app: `promo/index.html`
+- Dev deploy helper (`brrrr.app`): `deploy-scp.sh`
+- Live bootstrap+deploy (`byob-hkbeer.co`): `deploy-byob-server.sh`
+- Local deploy templates: `.env.deploy.example` and `.env.byob.example`
 - Internal project notes: `AGENTS.md`
 
 There is no backend, build step, or package manager. The site is deployed by copying the HTML file directly to the server.
@@ -43,13 +45,23 @@ There is no backend, build step, or package manager. The site is deployed by cop
 	- Plain text body used for Google/ICS.
 	- HTML `<br><br>` body used for Outlook deep links.
 	- Outlook note appends a `Promo QR` image generated at runtime from the promo URL and embedded as a base64 data URL.
+- Promo redemption landing:
+	- Dynamic single-page redemption UI at `promo/index.html`.
+	- Reads promo code from either:
+		- path style: `/promo/<PROMOCODE>/`
+		- query style: `/promo/?code=<PROMOCODE>`
+	- Displays a tick, promo code, venue mapping, and redemption copy (`Thank you! Beer redeemed.`).
+	- Shows an invalid-code state when mapping is not found.
 
 ## Repo Structure
 
 ```text
 byob-boss-invite.html   Main microsite
-deploy-scp.sh           SCP deploy script
+promo/index.html        Promo redemption landing app
+deploy-scp.sh           Dev deploy script (brrrr.app)
+deploy-byob-server.sh   Live server setup + deploy script (byob-hkbeer.co)
 .env.deploy.example     Template for local deploy config
+.env.byob.example       Template for live domain/server bootstrap config
 ops/server-notes.md     Live server and auth notes
 README.md               Project overview and deploy guide
 AGENTS.md               Project-specific implementation notes
@@ -63,15 +75,15 @@ Open `byob-boss-invite.html` directly in a browser, or serve the folder locally:
 python3 -m http.server 8000
 ```
 
-## Deploy with SCP
+## Deployment Scripts
 
-This project is a single static HTML file, so deployment is a straight `scp` upload.
+This repo has two deployment scripts for different targets.
 
-For safer repeated deploys, keep server settings in a local env file and keep the actual private key in `~/.ssh` or your SSH agent. Do not store raw private key contents in the repo.
+### 1) Dev deploy (`brrrr.app`) using `deploy-scp.sh`
 
-### Reusable helper script
+Use this script to deploy to the existing `brrrr.app` path (`/hkbeerco/byob/`) and keep promo redemption routes working.
 
-The repo includes `deploy-scp.sh` so you can avoid retyping the command:
+Run:
 
 ```sh
 chmod +x deploy-scp.sh
@@ -80,42 +92,115 @@ cp .env.deploy.example .env.deploy
 ./deploy-scp.sh
 ```
 
-Example `.env.deploy`:
+What it does:
+
+- Uploads `SOURCE_FILE` (usually `byob-boss-invite.html`) as `REMOTE_NAME`.
+- Uploads asset directories (default `images fonts promo`).
+- Applies remote file/dir chmods.
+- Ensures Nginx promo fallback exists for dynamic promo URLs under `/hkbeerco/byob/promo/`.
+- Optionally verifies a known promo URL after deploy.
+
+Important `.env.deploy` variables:
+
+- Core SSH/paths:
+	- `REMOTE_USER`, `REMOTE_HOST`, `REMOTE_DIR`, `REMOTE_NAME`, `SSH_PORT`, `SSH_KEY`
+- Upload payload:
+	- `SOURCE_FILE`, `ASSET_DIRS`
+- File permissions:
+	- `REMOTE_FILE_CHMOD`, `REMOTE_DIR_CHMOD`
+	- `REMOTE_CHMOD_STRICT` (default `0` warns instead of failing on chmod step)
+- Promo route config:
+	- `CONFIGURE_PROMO_ROUTE` (default `1`)
+	- `REMOTE_NGINX_SITE` (default `/etc/nginx/sites-available/brrrr.app`)
+	- `PROMO_ROUTE_PREFIX` (default `/hkbeerco/byob/promo/`)
+	- `PROMO_ROUTE_FALLBACK` (default `/hkbeerco/byob/promo/index.html`)
+	- `PROMO_ROUTE_AUTH_OFF` (default `1`)
+	- `PROMO_AUTH_ENABLE` (default `0`)
+	- `PROMO_AUTH_REALM` (default `Promo Redemption`)
+	- `PROMO_AUTH_USER_FILE` (default `/etc/nginx/.htpasswd_promo`)
+	- `PROMO_ROUTE_STRICT` (default `0`)
+- Promo verification:
+	- `VERIFY_PROMO_ROUTE` (default `1`)
+	- `VERIFY_PROMO_BASE_URL` (default `https://brrrr.app/hkbeerco/byob/promo`)
+	- `VERIFY_PROMO_CODE` (default `BAB852`)
+	- `VERIFY_PROMO_EXPECT` (quote this value if it contains spaces)
+	- `VERIFY_PROMO_STRICT` (default `0`)
+
+Useful overrides:
 
 ```sh
-REMOTE_USER=user
-REMOTE_HOST=example.com
-REMOTE_DIR=/var/www/html
-REMOTE_NAME=index.html
-SSH_PORT=22
-SSH_KEY=~/.ssh/your-key
-SOURCE_FILE=byob-boss-invite.html
+# strict mode for both route config + URL verification
+PROMO_ROUTE_STRICT=1 VERIFY_PROMO_STRICT=1 ./deploy-scp.sh
+
+# run with a different env file
+ENV_FILE=.env.staging ./deploy-scp.sh
 ```
 
-Notes:
+### 2) Live domain bootstrap + deploy (`byob-hkbeer.co`) using `deploy-byob-server.sh`
 
-- `SSH_KEY` must point to the private key, not the `.pub` file.
-- If you use `ssh-agent`, you can omit `SSH_KEY` entirely.
-- `.env.deploy` and `.env.deploy.local` are gitignored.
-- The deploy script now runs a remote `chmod` after upload so the file stays readable by Nginx.
+Use this script for the dedicated live domain. It can install/configure Nginx + certbot and then upload the site bundle.
 
-If you want to use a different env file name:
+Run:
 
 ```sh
-ENV_FILE=.env.production ./deploy-scp.sh
+chmod +x deploy-byob-server.sh
+cp .env.byob.example .env.byob
+# edit .env.byob
+./deploy-byob-server.sh
 ```
 
-### One-off manual command
+What it does:
+
+- Server setup phase (optional):
+	- Installs Nginx/certbot (if needed)
+	- Writes Nginx server config for `DOMAIN` + `WWW_DOMAIN`
+	- Configures promo fallback route:
+		- `location ^~ /promo/ { try_files $uri $uri/ /promo/index.html; }`
+	- Enables site, validates Nginx, reloads
+	- Issues/renews certbot certs unless disabled
+- Upload phase:
+	- Bundles `SOURCE_FILE` plus `ASSET_DIRS` and extracts to `WEB_ROOT`
+	- Applies chmod/chown recursively
+
+Important `.env.byob` variables:
+
+- SSH: `REMOTE_USER`, `REMOTE_HOST`, `SSH_PORT`, `SSH_KEY`
+- Domain/SSL: `DOMAIN`, `WWW_DOMAIN`, `LE_EMAIL`, `SKIP_CERTBOT`, `CERTBOT_STAGING`
+- Promo auth (optional): `PROMO_AUTH_ENABLE`, `PROMO_AUTH_REALM`, `PROMO_AUTH_USER_FILE`
+- Paths/payload: `WEB_ROOT`, `SOURCE_FILE`, `TARGET_HTML`, `ASSET_DIRS`
+- Permissions: `REMOTE_FILE_CHMOD`, `REMOTE_DIR_CHMOD`
+- Toggles: `SKIP_SERVER_SETUP`, `SKIP_UPLOAD`
+
+To password-protect `/promo/*` on the live domain:
 
 ```sh
-scp byob-boss-invite.html user@example.com:/var/www/html/index.html
+# on server
+sudo htpasswd -c /etc/nginx/.htpasswd_promo your-username
 ```
 
-If your server uses a custom SSH port or private key:
+Then set in `.env.byob`:
 
 ```sh
-scp -P 2222 -i ~/.ssh/your-key byob-boss-invite.html user@example.com:/var/www/html/index.html
+PROMO_AUTH_ENABLE=1
+PROMO_AUTH_REALM="Promo Redemption"
+PROMO_AUTH_USER_FILE=/etc/nginx/.htpasswd_promo
 ```
+
+Useful runs:
+
+```sh
+# upload only (skip server/bootstrap changes)
+SKIP_SERVER_SETUP=1 ./deploy-byob-server.sh
+
+# setup only (skip content upload)
+SKIP_UPLOAD=1 ./deploy-byob-server.sh
+```
+
+### Troubleshooting quick notes
+
+- If deploy ends with SSH connection errors after uploads, content may already be live.
+- If `.env` sourcing fails with `command not found`, check for unquoted values with spaces.
+- If promo verification returns 404, confirm Nginx promo fallback block is present and reloaded.
 
 ## Operations
 
@@ -155,3 +240,6 @@ That file covers:
 	- Virtual mode uses virtual-specific invite copy.
 7. Validate Outlook note rendering:
 	- `Promo QR` heading appears with embedded QR image.
+8. Validate promo redemption routes:
+	- Open a known code URL like `/promo/BAB852/` and verify tick + code + venue.
+	- Open an unknown code URL like `/promo/NOPE123/` and verify invalid-code state.
