@@ -515,11 +515,13 @@
       <option value="The Pontiac, Central">The Pontiac, Central</option>
       <option value="Draft Land, Central">Draft Land, Central</option>
       <option value="The Madhouse Taproom, Mong Kok">The Madhouse Taproom, Mong Kok</option>
-      <option value="The Ale Project, Prince Edward">The Ale Project, Prince Edward</option>
-      <option value="Ping Pong 129, Sai Ying Pun">Ping Pong 129, Sai Ying Pun</option>
     </select>
     <span class="hint" id="venueHint">Choose the actual bar. This venue is used for invite creation and redemption check-off lists.</span>
     <a href="#" id="venueMapLink" target="_blank" rel="noopener" style="display:none; margin-top:8px; font-size:12.5px; color:var(--ember); text-decoration:none; font-weight:600;">📍 View on Google Maps →</a>
+    <div id="promoQrWrap" style="display:none; margin-top:10px;">
+      <img id="promoQrImage" alt="Promo QR code" width="160" height="160" style="display:block; width:160px; height:160px; border:1px solid rgba(255,255,255,0.25); background:#fff;">
+      <a href="#" id="promoLink" target="_blank" rel="noopener" style="display:inline-block; margin-top:8px; font-size:12.5px; color:#fff; text-decoration:none; font-weight:600;">🎟 Promo →</a>
+    </div>
   </div>
 
   <div class="field">
@@ -572,10 +574,31 @@
   function mapsUrl(place){
     return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(place);
   }
+  const PROMO_BASE_URL = 'https://byob-hkbeer.co/promo/';
+  const PROMO_CODES_BY_LOCATION = {
+    'The Globe, SoHo': 'TGS852',
+    'The Pontiac, Central': 'TPC852',
+    'Draft Land, Central': 'DLC852',
+    'The Madhouse Taproom, Mong Kok': 'MTM852',
+    'Virtual': 'VIR852'
+  };
+
+  function promoCodeForLocation(location){
+    return PROMO_CODES_BY_LOCATION[location] || '';
+  }
+
+  function promoUrlForLocation(location){
+    const code = promoCodeForLocation(location);
+    return code ? (PROMO_BASE_URL + code + '/') : '';
+  }
+
   const venueInput = document.getElementById('venue');
   const venueLabel = document.getElementById('venueLabel');
   const venueHint = document.getElementById('venueHint');
   const venueMapLink = document.getElementById('venueMapLink');
+  const promoQrWrap = document.getElementById('promoQrWrap');
+  const promoQrImage = document.getElementById('promoQrImage');
+  const promoLink = document.getElementById('promoLink');
   const modeBarBtn = document.getElementById('modeBar');
   const modeVirtualBtn = document.getElementById('modeVirtual');
   const topicInput = document.getElementById('topic');
@@ -629,6 +652,20 @@
   modeVirtualBtn.addEventListener('click', function(){ setMeetingMode('virtual'); });
 
   function syncVenueMapLink(){
+    const location = meetingMode === 'virtual' ? 'Virtual' : venueInput.value.trim();
+    const promoCode = promoCodeForLocation(location);
+    const promoUrl = promoUrlForLocation(location);
+
+    if(promoCode && promoUrl){
+      promoLink.href = promoUrl;
+      promoLink.textContent = '🎟 Promo: ' + promoCode + ' →';
+      promoQrImage.src = 'https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=' + encodeURIComponent(promoUrl);
+      promoQrWrap.style.display = 'block';
+      promoLink.style.pointerEvents = 'auto';
+    } else {
+      promoQrWrap.style.display = 'none';
+    }
+
     if(meetingMode === 'virtual'){
       venueMapLink.textContent = 'Virtual';
       venueMapLink.removeAttribute('href');
@@ -697,6 +734,8 @@
     }
 
     const mapLink = mapsUrl(venue);
+    const promoCode = promoCodeForLocation(venue);
+    const promoUrl = promoUrlForLocation(venue);
     const subject = topic + ' — hosted by Hong Kong Beer';
     const bodyParagraphs = [
       'Hi ' + bossName,
@@ -704,6 +743,8 @@
       'We can talk about how we\'re moving forward on ' + topic + '.',
       'We probably won\'t. But we can.',
       'Oh by the way, because you\'re coming with me, we\'ll both get a free Hong Kong Beer.',
+      'Promo code: ' + (promoCode || 'N/A') + '.',
+      'Promo URL: ' + (promoUrl || 'N/A'),
       'Food for thought.',
       'HK Beer: Show this invite at the bar to claim your free beer.',
       'See you then.'
