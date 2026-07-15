@@ -573,7 +573,7 @@
   function mapsUrl(place){
     return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(place);
   }
-  const PROMO_BASE_URL = 'https://byob-hkbeer.co/promo/';
+  const PROMO_BASE_PATH = 'promo/';
   const PROMO_CODES_BY_LOCATION = {
     'Central: Belly and the Beer': 'BAB852',
     'Wan Chai: Hoppy Junction': 'HJT852',
@@ -589,7 +589,10 @@
 
   function promoUrlForLocation(location){
     const code = promoCodeForLocation(location);
-    return code ? (PROMO_BASE_URL + code + '/') : '';
+    if(!code){
+      return '';
+    }
+    return new URL(PROMO_BASE_PATH + code + '/', window.location.href).href;
   }
 
   const venueInput = document.getElementById('venue');
