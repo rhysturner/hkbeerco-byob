@@ -38,10 +38,14 @@
     position: relative;
     overflow: hidden;
   }
-  .hero-art{
+  .hero-media{
     width: 100%;
-    height: auto;
+    height: 100%;
     display: block;
+    object-fit: cover;
+  }
+  .hero-video{
+    background: #000;
   }
   .hero-copy{
     position: absolute;
@@ -67,6 +71,7 @@
 
   .field{ margin-bottom: 18px; }
   .field-row{ display: grid; grid-template-columns: 1fr; gap: 14px; }
+  #topicField{ margin-bottom: 18px; }
   .mode-toggle{
     display: inline-grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -75,7 +80,7 @@
     margin-bottom: 10px;
   }
   .mode-toggle-btn{
-    min-height: 46px;
+    min-height: 54px;
     border: 1px solid rgba(255, 69, 34, 0.35);
     background: rgba(0,0,0,0.18);
     color: var(--cream);
@@ -83,7 +88,7 @@
     text-transform: uppercase;
     font-size: 20px;
     line-height: 1;
-    padding: 10px 12px 8px;
+    padding: 14px 18px;
     cursor: pointer;
   }
   .mode-toggle-btn.active{
@@ -473,12 +478,16 @@
 </div>
 
 <div class="hero">
-  <img class="hero-art" src="images/BYOB_Microsite_header_1.png" alt="BYOB Microsite header art">
+  <video class="hero-media hero-video" autoplay muted loop playsinline webkit-playsinline preload="metadata" poster="images/BYOB_Microsite_header_1.png" aria-label="BYOB Microsite header art">
+    <source src="video/header-wide.mp4" type="video/mp4">
+    <source src="video/header-wide.ogg" type="video/ogg">
+    <img class="hero-media" src="images/BYOB_Microsite_header_1.png" alt="BYOB Microsite header art">
+  </video>
   <div class="hero-copy">
-    <span class="hero-copy-desktop">Turn "we should catch up" into a real invite — to an actual bar, during the actual final.
-      <br>Your boss will know exactly what they're saying yes to.</span>
-    <span class="hero-copy-mobile">Turn "we should catch up" into a real bar invite for the final. 
-      <br>Your boss will know exactly what they're saying yes to.</span>
+    <span class="hero-copy-desktop">Kickoff at 3am. Work at 9am. One fix? Bring your own boss. Foster team bonding with a fresh local craft brew.
+</span>
+    <span class="hero-copy-mobile">Kickoff at 3am. Work at 9am. One fix? Bring your own boss. Foster team bonding with a fresh local craft brew.
+</span>
   </div>
 </div>
 
@@ -486,27 +495,27 @@
 
   <div class="field">
     <label for="bossName">Boss Name</label>
-    <input type="text" id="bossName" placeholder="e.g. Sarah Johnson">
+    <input type="text" id="bossName" placeholder="e.g. Sarah J.">
   </div>
 
-  <div class="field">
-    <label for="topic">Meeting Topic <span class="hint" style="display:inline; margin:0;">(the corporate-sounding cover story)</span></label>
-    <select id="topic" required>
-      <option value="" selected disabled>Select meeting topic</option>
-      <option value="Q3 Planning Sync">Q3 Planning Sync</option>
-      <option value="Budgeting Discussion">Budgeting Discussion</option>
-      <option value="Culture &amp; Alignment Check-in">Culture &amp; Alignment Check-in</option>
-      <option value="Cross-Team Strategy Review">Cross-Team Strategy Review</option>
-      <option value="H2 Priorities Catch-up">H2 Priorities Catch-up</option>
-      <option value="__custom__">(write your own)</option>
-    </select>
-    <input type="text" id="topicCustom" placeholder="Write your own meeting topic" style="display:none; margin-top:10px;">
-  </div>
-
+  
   <div class="field">
     <div class="mode-toggle" role="group" aria-label="Location mode">
-      <button type="button" class="mode-toggle-btn active" id="modeBar" aria-pressed="true">Option 1</button>
-      <button type="button" class="mode-toggle-btn" id="modeVirtual" aria-pressed="false">Option 2</button>
+      <button type="button" class="mode-toggle-btn active" id="modeBar" aria-pressed="true">MEET UP FOR THE FINAL</button>
+      <button type="button" class="mode-toggle-btn" id="modeVirtual" aria-pressed="false">BRING BEER TO YOUR BOSS
+</button>
+    </div>
+    <div id="topicField">
+      <label for="topic">Meeting Topic <span class="hint" style="display:inline; margin:0;">(the corporate-sounding cover story)</span></label>
+      <select id="topic" required>
+        <option value="" selected disabled>Select meeting topic</option>
+        <option value="Q3 Planning Sync">Q3 Planning Sync</option>
+        <option value="Budgeting Discussion">Budgeting Discussion</option>
+        <option value="Culture &amp; Alignment Check-in">Culture &amp; Alignment Check-in</option>
+        <option value="Cross-Team Strategy Review">Cross-Team Strategy Review</option>
+        <option value="H2 Priorities Catch-up">H2 Priorities Catch-up</option>
+      </select>
+      <input type="text" id="topicCustom" placeholder="Write your own meeting topic" style="display:none; margin-top:10px;">
     </div>
     <label for="venue" id="venueLabel">Bar / Venue <span class="hint" style="display:inline; margin:0;">(required)</span></label>
     <select id="venue" required>
@@ -524,7 +533,7 @@
 
   <div class="field" id="timeField">
     <label for="time">Time</label>
-    <input type="text" id="time" value="Tuesday, 20 July 2026, 03:00 am - 05:00am" readonly>
+    <input type="text" id="time" value="Monday, 20 July 2026, 03:00 am - 05:00am" readonly>
   </div>
 
   <div class="section-label">Select Calendar</div>
@@ -550,8 +559,17 @@
   <div class="hint" style="margin: 0 0 20px;">Want it to open straight in the Outlook desktop app instead of the browser? Pick "Desktop App (.ics)" — it skips the web sign-in entirely and opens whatever calendar app is set as default on your computer.</div>
 
   <button class="generate-btn" id="addEventBtn">Add Event</button>
-  <div class="disclaimer">This opens your calendar's own "new event" screen with the message already written, location set, and time already blocked. You just hit save, the same way you normally would.</div>
-  <div class="disclaimer" style="margin-top: 8px;">Free beer claims are manually validated at the venue by matching event topic/time against HK Beer CO invite records for that selected bar.</div>
+  <div class="disclaimer">This opens your calendar's own "new event" screen,  the time already blocked, the venue already selected, and the message already written. You just add the guest and hit save, the same way you normally would. 
+We do not have access to your own calendar. We do not collect or sell personal identifying information.
+</div>
+<div class="disclaimer" style="margin-top: 8px;">
+  Redemption is via QR Code automatically generated from BYOB page.
+</div>
+<div class="disclaimer" style="margin-top: 8px;">
+HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
+</div>
+
+
   <div class="status" id="status"></div>
 
 </div>
@@ -567,13 +585,14 @@
   }
   const fixedStart = new Date(2026, 6, 20, 3, 0, 0);  // Tue Jul 20, 3:00 AM
   const fixedEnd = new Date(2026, 6, 20, 5, 0, 0);    // Tue Jul 20, 5:00 AM
-  const barTimeLabel = 'Tuesday, 20 July 2026, 03:00 am - 05:00am';
+  const barTimeLabel = 'Monday, 20 July 2026, 03:00 am - 05:00am';
 
   // ---- venue -> Google Maps link, live as you type ----
   function mapsUrl(place){
     return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(place);
   }
   const PROMO_BASE_PATH = 'promo/';
+  const BOSS_BREWERY_ADDRESS = 'Unit A, Ground Floor, Wang Kwong Industrial Building, 45 Hung To Rd, Kwun Tong';
   const PROMO_CODES_BY_LOCATION = {
     'Central: Belly and the Beer': 'BAB852',
     'Wan Chai: Hoppy Junction': 'HJT852',
@@ -604,6 +623,7 @@
   const timeInput = document.getElementById('time');
   const modeBarBtn = document.getElementById('modeBar');
   const modeVirtualBtn = document.getElementById('modeVirtual');
+  const topicField = document.getElementById('topicField');
   const topicInput = document.getElementById('topic');
   const topicCustomInput = document.getElementById('topicCustom');
   let meetingMode = 'bar';
@@ -611,7 +631,8 @@
   function syncTopicInput(){
     const useCustomTopic = topicInput.value === '__custom__';
     topicCustomInput.style.display = useCustomTopic ? 'block' : 'none';
-    topicCustomInput.required = useCustomTopic;
+    topicInput.required = meetingMode !== 'virtual';
+    topicCustomInput.required = useCustomTopic && meetingMode !== 'virtual';
     if(!useCustomTopic){
       topicCustomInput.value = '';
     }
@@ -630,11 +651,19 @@
 
     venueLabel.innerHTML = isVirtual
       ? 'Click and Collect <span class="hint" style="display:inline; margin:0;">(required)</span>'
-      : 'Bar / Venue <span class="hint" style="display:inline; margin:0;">(required)</span>';
+      : 'Bar / Venue <span class="hint" style="display:inline; margin:0;">(required, this will be used for invite creation and promotion redemption)</span>';
 
     venueHint.textContent = isVirtual
-      ? 'Click and Collect a beer for your boss. Go to a participating venue and show them the QR code to redeem.'
+      ? 'Arrive at our brewery and collect two beers. One for you. One for your boss.\n\nAddress: ' + BOSS_BREWERY_ADDRESS + '\n\nOpening Hours: Wednesday — Friday 4 to 6pm'
       : 'Choose the actual bar. This venue is used for invite creation and redemption check-off lists.';
+    venueHint.style.whiteSpace = isVirtual ? 'pre-line' : '';
+
+    if(topicField){
+      topicField.style.display = isVirtual ? 'none' : '';
+    }
+
+    topicInput.required = !isVirtual;
+    topicCustomInput.required = false;
 
     if(isVirtual){
       lastBarVenue = venueInput.value || lastBarVenue;
@@ -672,11 +701,11 @@
     }
 
     if(meetingMode === 'virtual'){
-      venueMapLink.textContent = 'Virtual';
-      venueMapLink.removeAttribute('href');
-      venueMapLink.removeAttribute('target');
+      venueMapLink.textContent = '📍 View on Google Maps →';
+      venueMapLink.href = mapsUrl(BOSS_BREWERY_ADDRESS);
+      venueMapLink.target = '_blank';
       venueMapLink.style.display = 'inline-block';
-      venueMapLink.style.pointerEvents = 'none';
+      venueMapLink.style.pointerEvents = 'auto';
       return;
     }
 
@@ -694,6 +723,21 @@
   venueInput.addEventListener('input', syncVenueMapLink);
   venueInput.addEventListener('change', syncVenueMapLink);
   setMeetingMode('bar');
+
+  const heroVideo = document.querySelector('.hero-video');
+  if(heroVideo){
+    const tryPlayHeroVideo = function(){
+      const playPromise = heroVideo.play();
+      if(playPromise && typeof playPromise.catch === 'function'){
+        playPromise.catch(function(){});
+      }
+    };
+    if(heroVideo.readyState >= 2){
+      tryPlayHeroVideo();
+    } else {
+      heroVideo.addEventListener('canplay', tryPlayHeroVideo, { once: true });
+    }
+  }
 
   // ---- calendar selector ----
   let selectedCal = 'outlook-work';
