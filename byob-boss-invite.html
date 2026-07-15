@@ -401,6 +401,9 @@
     inset: 0;
     z-index: 9998;
     display: none;
+    padding: 12px;
+    padding-top: max(12px, env(safe-area-inset-top));
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
   }
   .promo-terms__overlay{
     position: absolute;
@@ -411,12 +414,13 @@
     position: relative;
     z-index: 1;
     width: min(92vw, 680px);
-    margin: 40px auto;
+    margin: auto;
     background: #4f120f;
     border: 1px solid rgba(255,255,255,0.14);
     box-shadow: 0 20px 48px rgba(0,0,0,0.45);
     color: #fff;
-    max-height: calc(100vh - 80px);
+    max-height: calc(100vh - 24px);
+    max-height: calc(100dvh - 24px);
     display: flex;
     flex-direction: column;
   }
@@ -440,6 +444,7 @@
   .promo-terms__body{
     padding: 14px 20px;
     overflow: auto;
+    -webkit-overflow-scrolling: touch;
     font-size: 13px;
     line-height: 1.45;
   }
@@ -466,7 +471,11 @@
     display: flex;
     gap: 10px;
     justify-content: flex-end;
+    position: sticky;
+    bottom: 0;
+    background: #4f120f;
     padding: 14px 20px 18px;
+    padding-bottom: calc(18px + env(safe-area-inset-bottom));
     border-top: 1px solid rgba(255,255,255,0.12);
   }
   .promo-terms__btn{
@@ -498,6 +507,23 @@
   }
 
   @media (max-width: 639px){
+    .promo-terms{
+      padding: 8px;
+      padding-top: max(8px, env(safe-area-inset-top));
+      padding-bottom: max(8px, env(safe-area-inset-bottom));
+    }
+    .promo-terms__dialog{
+      width: 100%;
+      max-height: calc(100vh - 16px);
+      max-height: calc(100dvh - 16px);
+    }
+    .promo-terms__actions{
+      justify-content: stretch;
+    }
+    .promo-terms__btn{
+      flex: 1;
+    }
+
     .hero-copy{
       bottom: 18px;
       width: min(92%, 410px);
@@ -582,17 +608,17 @@
     <button type="button" class="lang-switch__btn" id="langCnBtn" aria-pressed="false">中</button>
   </div>
 
-  <div class="field">
-    <label for="bossName" id="bossNameLabel">Boss Name</label>
-    <input type="text" id="bossName" placeholder="e.g. Sarah J.">
-  </div>
-
+  
   
   <div class="field">
     <div class="mode-toggle" role="group" aria-label="Location mode">
       <button type="button" class="mode-toggle-btn active" id="modeBar" aria-pressed="true">MEET UP FOR THE FINAL</button>
       <button type="button" class="mode-toggle-btn" id="modeVirtual" aria-pressed="false">BRING BEER TO YOUR BOSS
-</button>
+      </button>
+    </div>
+    <div class="field">
+      <label for="bossName" id="bossNameLabel">Boss Name</label>
+      <input type="text" id="bossName" placeholder="e.g. Sarah J.">
     </div>
     <div id="topicField">
       <label for="topic" id="topicLabel">Meeting Topic <span class="hint" id="topicHint" style="display:inline; margin:0;">(the corporate-sounding cover story)</span></label>
@@ -719,7 +745,7 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
   }
 
   function virtualCodePageUrl(){
-    return 'virtual-code.html';
+    return 'images/virtual-code.html';
   }
 
   const COPY = {
