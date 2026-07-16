@@ -706,6 +706,8 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
     }
     const text = (button.innerText || button.textContent || '').replace(/\s+/g, ' ').trim();
     window.gtag('event', 'button_click', {
+      send_to: 'G-7L2BPER1X3',
+      debug_mode: true,
       button_id: button.id || '',
       button_text: text,
       page_path: window.location.pathname
@@ -725,7 +727,7 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
   function mapsUrl(place){
     return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(place);
   }
-  const PROMO_BASE_PATH = 'promo/';
+  const PROMO_BASE_PATH = '';
   const BOSS_BREWERY_ADDRESS = 'Unit A, Ground Floor, Wang Kwong Industrial Building, 45 Hung To Rd, Kwun Tong';
   const VIRTUAL_MAP_URL = 'https://maps.app.goo.gl/hyuQBwh5i3sA9fty9?g_st=iw';
   const PROMO_CODES_BY_LOCATION = {
@@ -750,7 +752,7 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
     const baseHref = window.location.protocol === 'file:'
       ? 'https://byob-hkbeer.co/'
       : window.location.href;
-    return new URL(PROMO_BASE_PATH + code + '/', baseHref).href;
+    return new URL(PROMO_BASE_PATH + code + '/index.html', baseHref).href;
   }
 
   function promoQrImageUrlForLocation(location){
@@ -760,13 +762,13 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
     }
     // Use a known public base when previewing from file://, otherwise resolve from current page.
     const baseHref = window.location.protocol === 'file:'
-      ? 'https://brrrr.app/hkbeerco/byob/'
+      ? 'https://byob-hkbeer.co/'
       : window.location.href;
-    return new URL('images/qr/' + code + '.png', baseHref).href;
+    return new URL('qr/' + code + '.png', baseHref).href;
   }
 
   function virtualCodePageUrl(){
-    return 'virtual-code.html';
+    return 'virtual-code.html?lang=' + encodeURIComponent(currentLanguage);
   }
 
   const COPY = {
@@ -841,7 +843,7 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
       openedOutlookWork: 'Opened in Outlook (work/school). Hit Send there to block your time and send the invite. If it loops to sign-in, use Outlook.com personal or .ics.',
       openedIcs: 'Downloaded .ics. Open it in your desktop calendar app and save to send invites.',
       qrBase64Error: 'Unable to convert QR image to base64.',
-      promoQrFallback: 'Click here if you do not see a QR code: {{promoQrImageUrl}}',
+      promoPageFallback: 'Click here if you do not see the QR page: {{promoUrl}}',
       subject: '{{topic}}',
       bodyVirtual: [
         'Here\'s your QR code to redeem your two free Hong Kong Beers.',
@@ -898,7 +900,7 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
       venueHintRequiredMode: '（必填，此資料將用於建立邀請及換領推廣優惠）',
       venuePlaceholder: '選擇場地',
       venueHelp: '選擇實際場地。此場地將用於建立邀請及換領核對名單',
-      virtualVenueHelp: '到達我們的釀酒廠，領取兩杯啤酒。一杯給你，一杯給你老闆。\n\n地址：觀塘鴻圖道45號宏光工業大廈地下A室\n\n開放時間：星期三至五 下午4時至6時',
+      virtualVenueHelp: '到達我們的釀酒廠，領取兩杯啤酒。一杯給你，一杯給你老闆。\n\n地址：觀塘鴻圖道45號宏光工業大廈地下A室\n\n開放時間：7月17日 10am - 7pm',
       mapLink: '📍 於Google Maps查看 →',
       promoDebugLink: '🎟 推廣優惠除錯連結 →',
       promoDebugPrefix: '🎟 推廣優惠除錯：',
@@ -929,7 +931,7 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
       openedOutlookWork: '已於 Outlook（工作/學校）開啟。請按「傳送」以鎖定時間並發送邀請。如頁面跳轉至登入畫面，請改用 Outlook.com 個人版或 .ics。',
       openedIcs: '已下載 .ics 檔案。請於桌面日曆應用程式開啟並儲存以發送邀請。',
       qrBase64Error: '無法將 QR 圖片轉換為 base64。',
-      promoQrFallback: 'Click here if you do not see a QR code: {{promoQrImageUrl}}',
+      promoPageFallback: 'Click here if you do not see the QR page: {{promoUrl}}',
       subject: '{{topic}} — 由 Hong Kong Beer 主辦',
       bodyVirtual: [
         '你好，{{bossName}}',
@@ -1015,6 +1017,7 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
 
   function applyLanguage(language){
     currentLanguage = language;
+    localStorage.setItem('byob_language', language);
     const copy = COPY[language];
 
     document.body.classList.toggle('lang-cn', language === 'cn');
@@ -1203,7 +1206,7 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
   langEnBtn.addEventListener('click', function(){ applyLanguage('en'); });
   langCnBtn.addEventListener('click', function(){ applyLanguage('cn'); });
   setMeetingMode('bar');
-  applyLanguage('en');
+  applyLanguage(localStorage.getItem('byob_language') === 'cn' ? 'cn' : 'en');
 
   const heroVideo = document.querySelector('.hero-video');
   const heroSourceMp4 = document.getElementById('heroSourceMp4');
@@ -1316,6 +1319,8 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
       const submitButton = document.getElementById('addEventBtn');
       const promoCode = promoCodeForLocation(venue);
       const submitPayload = {
+        send_to: 'G-7L2BPER1X3',
+        debug_mode: true,
         button_id: submitButton ? submitButton.id : 'addEventBtn',
         button_text: submitButton ? (submitButton.innerText || submitButton.textContent || '').replace(/\s+/g, ' ').trim() : 'Add Event',
         page_path: window.location.pathname,
@@ -1387,8 +1392,8 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
     const bodyParagraphs = bodyTemplates.map(function(line){
       return formatTemplate(line, { bossName: bossName, topic: topic, venue: venue });
     });
-    if(promoQrImageUrl){
-      bodyParagraphs.push(formatTemplate(copy.promoQrFallback, { promoQrImageUrl: promoQrImageUrl }));
+    if(promoUrl){
+      bodyParagraphs.push(formatTemplate(copy.promoPageFallback, { promoUrl: promoUrl }));
     }
 
     // Google Calendar accepts plain LF newlines more consistently for details.
