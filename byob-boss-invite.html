@@ -104,7 +104,7 @@
     font-weight: 600;
     text-wrap: balance;
     background: transparent;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+    /* text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45); */
     pointer-events: none;
   }
   .hero-copy-mobile{ display: none; }
@@ -597,8 +597,8 @@
 
 <div class="hero">
   <video class="hero-media hero-video" autoplay muted loop playsinline webkit-playsinline preload="metadata" poster="images/BYOB_Microsite_header_1.png" aria-label="BYOB Microsite header art">
-    <source src="video/header-wide.mp4" type="video/mp4">
-    <source src="video/header-wide.ogg" type="video/ogg">
+    <source id="heroSourceMp4" src="video/header-wide.mp4" type="video/mp4">
+    <source id="heroSourceOgg" src="video/header-wide.ogg" type="video/ogg">
     <img class="hero-media" src="images/BYOB_Microsite_header_1.png" alt="BYOB Microsite header art">
   </video>
   <div class="hero-copy">
@@ -1206,6 +1206,8 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
   applyLanguage('en');
 
   const heroVideo = document.querySelector('.hero-video');
+  const heroSourceMp4 = document.getElementById('heroSourceMp4');
+  const heroSourceOgg = document.getElementById('heroSourceOgg');
   if(heroVideo){
     const tryPlayHeroVideo = function(){
       const playPromise = heroVideo.play();
@@ -1213,6 +1215,31 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
         playPromise.catch(function(){});
       }
     };
+
+    const heroVideoViewport = window.matchMedia('(max-width: 639px)');
+    const syncHeroVideoSource = function(){
+      if(!heroSourceMp4 || !heroSourceOgg){
+        return;
+      }
+      const isMobileViewport = heroVideoViewport.matches;
+      const nextMp4 = isMobileViewport ? 'video/header-wide-mobile.mp4' : 'video/header-wide.mp4';
+      const nextOgg = isMobileViewport ? 'video/header-wide-mobile.ogg' : 'video/header-wide.ogg';
+      const hasChanged = heroSourceMp4.getAttribute('src') !== nextMp4 || heroSourceOgg.getAttribute('src') !== nextOgg;
+      if(hasChanged){
+        heroSourceMp4.setAttribute('src', nextMp4);
+        heroSourceOgg.setAttribute('src', nextOgg);
+        heroVideo.load();
+      }
+      tryPlayHeroVideo();
+    };
+
+    syncHeroVideoSource();
+    if(typeof heroVideoViewport.addEventListener === 'function'){
+      heroVideoViewport.addEventListener('change', syncHeroVideoSource);
+    } else if(typeof heroVideoViewport.addListener === 'function'){
+      heroVideoViewport.addListener(syncHeroVideoSource);
+    }
+
     if(heroVideo.readyState >= 2){
       tryPlayHeroVideo();
     } else {
