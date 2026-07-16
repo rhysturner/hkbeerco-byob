@@ -700,18 +700,44 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
 
 <script>
 (function(){
+  function getAddEventButtonContext(){
+    const isVirtual = typeof meetingMode !== 'undefined' && meetingMode === 'virtual';
+    const selectedTopicValue = typeof topicInput !== 'undefined' && topicInput ? topicInput.value : '';
+    const customTopicValue = typeof topicCustomInput !== 'undefined' && topicCustomInput ? topicCustomInput.value.trim() : '';
+    const resolvedTopic = isVirtual
+      ? 'Bring beer to your boss'
+      : (selectedTopicValue === '__custom__' ? customTopicValue : selectedTopicValue);
+    const resolvedVenue = isVirtual
+      ? 'Virtual'
+      : ((typeof venueInput !== 'undefined' && venueInput) ? venueInput.value : '');
+
+    return {
+      validation_state: 'click',
+      form_mode: typeof meetingMode !== 'undefined' ? meetingMode : '',
+      form_language: typeof currentLanguage !== 'undefined' ? currentLanguage : '',
+      form_calendar: typeof selectedCal !== 'undefined' ? selectedCal : '',
+      form_topic: resolvedTopic || '',
+      form_venue: resolvedVenue || '',
+      form_promo_code: promoCodeForLocation(resolvedVenue) || ''
+    };
+  }
+
   function trackButtonClick(button){
     if(typeof window.gtag !== 'function'){
       return;
     }
     const text = (button.innerText || button.textContent || '').replace(/\s+/g, ' ').trim();
-    window.gtag('event', 'button_click', {
+    const payload = {
       send_to: 'G-7L2BPER1X3',
       debug_mode: true,
       button_id: button.id || '',
       button_text: text,
       page_path: window.location.pathname
-    });
+    };
+    if(button.id === 'addEventBtn'){
+      Object.assign(payload, getAddEventButtonContext());
+    }
+    window.gtag('event', 'button_click', payload);
   }
 
   // ---- default date/time: night of the World Cup final ----
