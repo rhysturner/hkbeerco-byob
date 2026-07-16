@@ -26,6 +26,7 @@ WWW_DOMAIN="${WWW_DOMAIN:-www.byob-hkbeer.co}"
 LE_EMAIL="${LE_EMAIL:-}"
 CERTBOT_STAGING="${CERTBOT_STAGING:-0}"
 SKIP_CERTBOT="${SKIP_CERTBOT:-0}"
+CERTBOT_RENEW_DRY_RUN="${CERTBOT_RENEW_DRY_RUN:-0}"
 PROMO_AUTH_ENABLE="${PROMO_AUTH_ENABLE:-0}"
 PROMO_AUTH_REALM="${PROMO_AUTH_REALM:-Promo Redemption}"
 PROMO_AUTH_USER_FILE="${PROMO_AUTH_USER_FILE:-/etc/nginx/.htpasswd_promo}"
@@ -182,7 +183,9 @@ if [[ "\$SKIP_CERTBOT" != "1" ]]; then
     certbot_args+=(--staging)
   fi
   sudo certbot "\${certbot_args[@]}"
-  sudo certbot renew --dry-run
+  if [[ "\$CERTBOT_RENEW_DRY_RUN" == "1" ]]; then
+    sudo certbot renew --dry-run
+  fi
 fi
 EOF
 fi

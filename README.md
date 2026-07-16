@@ -166,6 +166,7 @@ Important `.env.byob` variables:
 
 - SSH: `REMOTE_USER`, `REMOTE_HOST`, `SSH_PORT`, `SSH_KEY`
 - Domain/SSL: `DOMAIN`, `WWW_DOMAIN`, `LE_EMAIL`, `SKIP_CERTBOT`, `CERTBOT_STAGING`
+- Post-certbot check: `CERTBOT_RENEW_DRY_RUN` (default `0`)
 - Promo auth (optional): `PROMO_AUTH_ENABLE`, `PROMO_AUTH_REALM`, `PROMO_AUTH_USER_FILE`
 - Paths/payload: `WEB_ROOT`, `SOURCE_FILE`, `TARGET_HTML`, `ASSET_DIRS`
 - Permissions: `REMOTE_FILE_CHMOD`, `REMOTE_DIR_CHMOD`
