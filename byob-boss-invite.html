@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BYOB — Bring Your Own Boss</title>
 <meta name="description" content="Turn Monday's meeting into Sunday night's bar table. An honest invite your boss can actually add to their calendar.">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-7L2BPER1X3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-7L2BPER1X3');
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -692,6 +700,18 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
 
 <script>
 (function(){
+  function trackButtonClick(button){
+    if(typeof window.gtag !== 'function'){
+      return;
+    }
+    const text = (button.innerText || button.textContent || '').replace(/\s+/g, ' ').trim();
+    window.gtag('event', 'button_click', {
+      button_id: button.id || '',
+      button_text: text,
+      page_path: window.location.pathname
+    });
+  }
+
   // ---- default date/time: night of the World Cup final ----
   function pad(n){ return String(n).padStart(2,'0'); }
   function toLocalInputValue(d){
@@ -1069,6 +1089,13 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
   topicInput.addEventListener('change', syncTopicInput);
   syncTopicInput();
 
+  document.addEventListener('click', function(event){
+    const button = event.target.closest('button');
+    if(button){
+      trackButtonClick(button);
+    }
+  }, true);
+
   function setMeetingMode(mode){
     meetingMode = mode;
     const isVirtual = mode === 'virtual';
@@ -1244,6 +1271,15 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
     if(event){
       event.preventDefault();
       event.stopPropagation();
+    }
+
+    if(typeof window.gtag === 'function'){
+      const submitButton = document.getElementById('addEventBtn');
+      window.gtag('event', 'submit_button_click', {
+        button_id: submitButton ? submitButton.id : 'addEventBtn',
+        button_text: submitButton ? (submitButton.innerText || submitButton.textContent || '').replace(/\s+/g, ' ').trim() : 'Add Event',
+        page_path: window.location.pathname
+      });
     }
 
     const copy = COPY[currentLanguage];
