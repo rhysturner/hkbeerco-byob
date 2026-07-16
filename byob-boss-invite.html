@@ -1273,15 +1273,6 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
       event.stopPropagation();
     }
 
-    if(typeof window.gtag === 'function'){
-      const submitButton = document.getElementById('addEventBtn');
-      window.gtag('event', 'submit_button_click', {
-        button_id: submitButton ? submitButton.id : 'addEventBtn',
-        button_text: submitButton ? (submitButton.innerText || submitButton.textContent || '').replace(/\s+/g, ' ').trim() : 'Add Event',
-        page_path: window.location.pathname
-      });
-    }
-
     const copy = COPY[currentLanguage];
     const isVirtual = meetingMode === 'virtual';
     const bossName = document.getElementById('bossName').value.trim() || copy.defaultBossName;
@@ -1291,23 +1282,48 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
       : (selectedTopic === '__custom__' ? topicCustomInput.value.trim() : selectedTopic);
     const venue = isVirtual ? 'Virtual' : venueInput.value;
 
+    function trackSubmitClick(validationState){
+      if(typeof window.gtag !== 'function'){
+        return;
+      }
+      const submitButton = document.getElementById('addEventBtn');
+      const promoCode = promoCodeForLocation(venue);
+      window.gtag('event', 'submit_button_click', {
+        button_id: submitButton ? submitButton.id : 'addEventBtn',
+        button_text: submitButton ? (submitButton.innerText || submitButton.textContent || '').replace(/\s+/g, ' ').trim() : 'Add Event',
+        page_path: window.location.pathname,
+        validation_state: validationState,
+        form_mode: meetingMode,
+        form_language: currentLanguage,
+        form_calendar: selectedCal,
+        form_topic: topic || '',
+        form_venue: venue || '',
+        form_promo_code: promoCode || ''
+      });
+    }
+
     if(!isVirtual && !selectedTopic){
+      trackSubmitClick('missing_topic');
       setStatus(copy.statusSelectTopic);
       topicInput.focus();
       return;
     }
 
     if(!isVirtual && selectedTopic === '__custom__' && !topic){
+      trackSubmitClick('missing_custom_topic');
       setStatus(copy.statusWriteCustomTopic);
       topicCustomInput.focus();
       return;
     }
 
     if(meetingMode !== 'virtual' && !venue){
+      trackSubmitClick('missing_venue');
       setStatus(copy.statusSelectVenue);
       venueInput.focus();
       return;
     }
+
+    trackSubmitClick('valid');
 
     if(isVirtual){
       window.open(virtualCodePageUrl(), '_blank', 'noopener');
