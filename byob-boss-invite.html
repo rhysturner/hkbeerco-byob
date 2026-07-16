@@ -462,32 +462,42 @@
     display: grid;
     gap: 8px;
   }
+  .promo-terms__footer{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    background: #4f120f;
+    padding: 12px 20px 18px;
+    padding-bottom: calc(18px + env(safe-area-inset-bottom));
+    border-top: 1px solid rgba(255,255,255,0.12);
+  }
   .promo-terms__confirm{
     display: flex;
     align-items: flex-start;
     gap: 10px;
-    margin-top: 12px;
+    margin-top: 0;
     font-size: 12px;
+    line-height: 1.35;
+    flex: 1;
+    cursor: pointer;
   }
   .promo-terms__confirm input{
-    margin-top: 2px;
-    width: 16px;
-    height: 16px;
+    margin-top: 1px;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
     accent-color: #ff1f0f;
   }
   .promo-terms__actions{
     display: flex;
     gap: 10px;
     justify-content: flex-end;
-    position: sticky;
-    bottom: 0;
-    background: #4f120f;
-    padding: 14px 20px 18px;
-    padding-bottom: calc(18px + env(safe-area-inset-bottom));
-    border-top: 1px solid rgba(255,255,255,0.12);
+    flex-shrink: 0;
   }
   .promo-terms__btn{
     min-height: 38px;
+    min-width: 116px;
     border: 1px solid rgba(255,255,255,0.34);
     background: transparent;
     color: #fff;
@@ -524,6 +534,15 @@
       width: 100%;
       max-height: calc(100vh - 16px);
       max-height: calc(100dvh - 16px);
+    }
+    .promo-terms__footer{
+      display: grid;
+      gap: 10px;
+      padding: 12px 16px 14px;
+      padding-bottom: calc(14px + env(safe-area-inset-bottom));
+    }
+    .promo-terms__confirm{
+      font-size: 11.5px;
     }
     .promo-terms__actions{
       justify-content: stretch;
@@ -583,14 +602,16 @@
         <li>Hong Kong Beer Co may amend, pause, or end this promotion where reasonably required, including stock limits and operational constraints.<br>香港啤酒公司有權在合理需要的情況下修改、暫停或終止此推廣活動，包括但不限於產品供應情況或場地營運限制。</li>
         <li>Please drink responsibly. Under the law of Hong Kong, intoxicating liquor must not be sold or supplied to a minor in the course of business.<br>請理性飲酒。根據香港法律，不得在業務過程中，向未成年人售賣或供應令人醺醉的酒類。</li>
       </ol>
+    </div>
+    <div class="promo-terms__footer">
       <label class="promo-terms__confirm" for="promoTermsConfirm">
         <input type="checkbox" id="promoTermsConfirm">
         <span id="promoTermsConfirmText">I AM 18 YEARS OF AGE OR OLDER AND I AGREE TO THE PROMOTION TERMS &amp; CONDITIONS ABOVE.<br>本人已年滿18歲，並同意以上推廣條款及細則。</span>
       </label>
-    </div>
-    <div class="promo-terms__actions">
-      <button type="button" class="promo-terms__btn" id="promoTermsDecline">Decline <br/> 拒絕</button>
-      <button type="button" class="promo-terms__btn promo-terms__btn--agree" id="promoTermsAgree" disabled>Agree &amp; Continue <br/> 同意並繼續</button>
+      <div class="promo-terms__actions">
+        <button type="button" class="promo-terms__btn" id="promoTermsDecline">Decline <br/> 拒絕</button>
+        <button type="button" class="promo-terms__btn promo-terms__btn--agree" id="promoTermsAgree" disabled>Agree &amp; Continue <br/> 同意並繼續</button>
+      </div>
     </div>
   </div>
 </div>
