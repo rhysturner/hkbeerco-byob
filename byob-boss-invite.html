@@ -700,6 +700,37 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
 
 <script>
 (function(){
+  
+  const gaDebugEnabled = new URLSearchParams(window.location.search).get('ga_debug') === '1';
+
+  function gaDebugLog(message){
+    if(!gaDebugEnabled){
+      return;
+    }
+
+    let badge = document.getElementById('gaDebugBadge');
+    if(!badge){
+      badge = document.createElement('div');
+      badge.id = 'gaDebugBadge';
+      badge.style.position = 'fixed';
+      badge.style.left = '16px';
+      badge.style.bottom = '16px';
+      badge.style.zIndex = '9999';
+      badge.style.maxWidth = 'min(92vw, 560px)';
+      badge.style.padding = '10px 12px';
+      badge.style.border = '1px solid rgba(255,255,255,0.28)';
+      badge.style.background = 'rgba(0, 0, 0, 0.82)';
+      badge.style.color = '#FBEFE6';
+      badge.style.fontSize = '12px';
+      badge.style.lineHeight = '1.3';
+      badge.style.whiteSpace = 'pre-wrap';
+      badge.style.fontFamily = "Menlo, Monaco, Consolas, 'Liberation Mono', monospace";
+      document.body.appendChild(badge);
+    }
+
+    const time = new Date().toLocaleTimeString();
+    badge.textContent = '[' + time + '] ' + message;
+  }
 
   function sendAnalyticsEvent(name, payload){
     return new Promise(function(resolve){
