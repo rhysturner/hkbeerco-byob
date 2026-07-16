@@ -700,6 +700,31 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
 
 <script>
 (function(){
+  function sendAnalyticsEvent(name, payload){
+    return new Promise(function(resolve){
+      if(typeof window.gtag !== 'function'){
+        resolve();
+        return;
+      }
+
+      let settled = false;
+      const finish = function(){
+        if(settled){
+          return;
+        }
+        settled = true;
+        resolve();
+      };
+
+      window.gtag('event', name, Object.assign({}, payload, {
+        transport_type: 'beacon',
+        event_callback: finish
+      }));
+
+      setTimeout(finish, 300);
+    });
+  }
+
   function getAddEventButtonContext(){
     const isVirtual = typeof meetingMode !== 'undefined' && meetingMode === 'virtual';
     const selectedTopicValue = typeof topicInput !== 'undefined' && topicInput ? topicInput.value : '';
@@ -737,7 +762,7 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
     if(button.id === 'addEventBtn'){
       Object.assign(payload, getAddEventButtonContext());
     }
-    window.gtag('event', 'button_click', payload);
+    sendAnalyticsEvent('button_click', payload);
   }
 
   // ---- default date/time: night of the World Cup final ----
@@ -1338,7 +1363,7 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
       : (selectedTopic === '__custom__' ? topicCustomInput.value.trim() : selectedTopic);
     const venue = isVirtual ? 'Virtual' : venueInput.value;
 
-    function trackSubmitClick(validationState){
+    async function trackSubmitClick(validationState){
       if(typeof window.gtag !== 'function'){
         return;
       }
@@ -1359,31 +1384,31 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
         form_venue: venue || '',
         form_promo_code: promoCode || ''
       };
-      window.gtag('event', 'submit_button_click', submitPayload);
+      await sendAnalyticsEvent('submit_button_click', submitPayload);
     }
 
     if(!isVirtual && !selectedTopic){
-      trackSubmitClick('missing_topic');
+      await trackSubmitClick('missing_topic');
       setStatus(copy.statusSelectTopic);
       topicInput.focus();
       return;
     }
 
     if(!isVirtual && selectedTopic === '__custom__' && !topic){
-      trackSubmitClick('missing_custom_topic');
+      await trackSubmitClick('missing_custom_topic');
       setStatus(copy.statusWriteCustomTopic);
       topicCustomInput.focus();
       return;
     }
 
     if(meetingMode !== 'virtual' && !venue){
-      trackSubmitClick('missing_venue');
+      await trackSubmitClick('missing_venue');
       setStatus(copy.statusSelectVenue);
       venueInput.focus();
       return;
     }
 
-    trackSubmitClick('valid');
+    await trackSubmitClick('valid');
 
     if(isVirtual){
       window.open(virtualCodePageUrl(), '_blank', 'noopener');
