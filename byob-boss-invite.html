@@ -1315,10 +1315,11 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
       }
       const submitButton = document.getElementById('addEventBtn');
       const promoCode = promoCodeForLocation(venue);
-      window.gtag('event', 'submit_button_click', {
+      const submitPayload = {
         button_id: submitButton ? submitButton.id : 'addEventBtn',
         button_text: submitButton ? (submitButton.innerText || submitButton.textContent || '').replace(/\s+/g, ' ').trim() : 'Add Event',
         page_path: window.location.pathname,
+        page_location: window.location.href,
         validation_state: validationState,
         form_mode: meetingMode,
         form_language: currentLanguage,
@@ -1326,7 +1327,9 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
         form_topic: topic || '',
         form_venue: venue || '',
         form_promo_code: promoCode || ''
-      });
+      };
+      window.gtag('event', 'form_submit', submitPayload);
+      window.gtag('event', 'submit_button_click', submitPayload);
     }
 
     if(!isVirtual && !selectedTopic){
