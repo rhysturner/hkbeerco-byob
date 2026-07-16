@@ -687,9 +687,9 @@ We do not have access to your own calendar. We do not collect or sell personal i
 <div class="disclaimer" id="disclaimerTwo" style="margin-top: 8px;">
   Redemption is via QR Code automatically generated from BYOB page.
 </div>
-<div class="disclaimer" id="disclaimerThree" style="margin-top: 8px;">
+<!-- <div class="disclaimer" id="disclaimerThree" style="margin-top: 8px;">
 HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
-</div>
+</div> -->
 
 
   <div class="status" id="status"></div>
@@ -831,8 +831,8 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
       openedVirtualCode: 'Opened virtual redemption code page.',
       disclaimerOne: 'This opens your calendar\'s own "new event" screen, the time already blocked, the venue already selected, and the message already written. You just add the guest and hit save, the same way you normally would. We do not have access to your own calendar. We do not collect or sell personal identifying information.',
       disclaimerTwo: 'Redemption is via QR Code automatically generated from BYOB page.',
-      disclaimerThree: 'HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995',
-      footer: 'HONG KONG BEER · DRINK RESPONSIBLY · YOUR BOSS CAN SEE THIS BEFORE THEY CLICK',
+      // disclaimerThree: 'HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995',
+      footer: 'HONG KONG BEER CO · BRINGING PEOPLE TOGETHER SINCE 1995',
       statusSelectTopic: 'Please select a meeting topic before creating the event.',
       statusWriteCustomTopic: 'Please write your custom meeting topic.',
       statusSelectVenue: 'Please select a venue before creating the event.',
@@ -842,17 +842,17 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
       openedIcs: 'Downloaded .ics. Open it in your desktop calendar app and save to send invites.',
       qrBase64Error: 'Unable to convert QR image to base64.',
       promoQrFallback: 'Click here if you do not see a QR code: {{promoQrImageUrl}}',
-      subject: '{{topic}} — hosted by Hong Kong Beer',
+      subject: '{{topic}}',
       bodyVirtual: [
         'Here\'s your QR code to redeem your two free Hong Kong Beers.',
         'Arrive at our brewery and collect two beers. One for you. One for your boss.',
         'Address: Unit A, Ground Floor, Wang Kwong Industrial Building, 45 Hung To Rd, Kwun Tong',
         'Opening Hours: Wednesday — Friday 4 to 6pm',
-        'Bring it to your boss and enjoy the World Cup Final!'
+        'Bring it to your boss and enjoy the World Cup final!'
       ],
       bodyBar: [
         'Hi {{bossName}}',
-        'Hope this calendar invite finds you well! Let\'s meet to discuss {{topic}} at {{venue}} at 3am. It just so happens to be the World Cup Final. What a coincidence, am I right?',
+        'Hope this calendar invite finds you well! Let\'s meet to discuss {{topic}} at {{venue}} at 3am. It just so happens to be the World Cup final. What a coincidence, am I right?',
         'We can talk about how we\'re moving forward on {{topic}} with the TV on quietly in the background.',
         'Oh by the way, Hong Kong Beer Co is providing each of us with a free local craft brew.',
         'Just some beer for thought.'
@@ -919,8 +919,8 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
       openedVirtualCode: '已開啟虛擬換領碼頁面。',
       disclaimerOne: '點擊後將直接開啟您行事曆的「新增行程」頁面，時間已為您預留，地點已選定，內容訊息亦已寫妥。您只需像平常一樣，加入受邀對象並點擊儲存即可。\n\n我們無法存取您的個人行事曆，亦絕不收集或轉售任何個人識別資料。',
       disclaimerTwo: '只需出示由 BYOB 網頁自動產生的 QR Code，即可進行兌換。',
-      disclaimerThree: 'HONG KONG BEER CO · 紮根香港自1995年',
-      footer: 'HONG KONG BEER · 請理性飲酒 · 你老闆點開前就會見到呢個',
+      // disclaimerThree: 'HONG KONG BEER CO · 紮根香港自1995年',
+      footer: 'HONG KONG BEER CO · 紮根香港自1995年',
       statusSelectTopic: '請先選擇會議主題再建立活動。',
       statusWriteCustomTopic: '請填寫你的自訂會議主題。',
       statusSelectVenue: '請先選擇場地再建立活動。',
@@ -998,7 +998,7 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
   const addEventBtn = document.getElementById('addEventBtn');
   const disclaimerOne = document.getElementById('disclaimerOne');
   const disclaimerTwo = document.getElementById('disclaimerTwo');
-  const disclaimerThree = document.getElementById('disclaimerThree');
+  // const disclaimerThree = document.getElementById('disclaimerThree');
   const footerCopy = document.getElementById('footerCopy');
   const statusText = document.getElementById('status');
   const timeInput = document.getElementById('time');
@@ -1061,7 +1061,7 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
     addEventBtn.textContent = copy.addEvent;
     disclaimerOne.textContent = copy.disclaimerOne;
     disclaimerTwo.textContent = copy.disclaimerTwo;
-    disclaimerThree.textContent = copy.disclaimerThree;
+    // disclaimerThree.textContent = copy.disclaimerThree;
     footerCopy.innerHTML = copy.footer;
 
     syncTopicInput();
@@ -1139,7 +1139,7 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
       outlookHelp2.style.display = 'none';
       disclaimerOne.style.display = 'none';
       disclaimerTwo.style.display = 'none';
-      disclaimerThree.style.display = 'none';
+      // disclaimerThree.style.display = 'none';
       addEventBtn.textContent = copy.generateCode;
     } else {
       if(bossNameField){
@@ -1160,7 +1160,7 @@ HONG KONG BEER CO  ·  BRINGING PEOPLE TOGETHER SINCE 1995
       outlookHelp2.style.display = '';
       disclaimerOne.style.display = '';
       disclaimerTwo.style.display = '';
-      disclaimerThree.style.display = '';
+      // disclaimerThree.style.display = '';
       addEventBtn.textContent = copy.addEvent;
     }
 
