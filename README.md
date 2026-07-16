@@ -5,7 +5,7 @@
 This repo contains a single-file static microsite for the BYOB campaign.
 
 - Main app: `byob-boss-invite.html`
-- Promo redeem app: `promo/index.html`
+- Promo redeem app: `promo/index.html` and public root copies under `BAB852/`, `HJT852/`, `HND852/`, `SMB852/`, `KTH852/`, `VIR852/`
 - Dev deploy helper (`brrrr.app`): `deploy-scp.sh`
 - Live bootstrap+deploy (`byob-hkbeer.co`): `deploy-byob-server.sh`
 - Local deploy templates: `.env.deploy.example` and `.env.byob.example`
@@ -33,12 +33,12 @@ There is no backend, build step, or package manager. The site is deployed by cop
 	- In bar mode, `#venueMapLink` points to Google Maps for the selected venue.
 	- In virtual mode, map link text shows `Virtual` and is non-clickable.
 - Promo code and URL mapping:
-	- `Central: Belly and the Beer` -> `BAB852` -> `https://byob-hkbeer.co/promo/BAB852/`
-	- `Wan Chai: Hoppy Junction` -> `HJT852` -> `https://byob-hkbeer.co/promo/HJT852/`
-	- `Prince Edward: HANDS` -> `HND852` -> `https://byob-hkbeer.co/promo/HND852/`
-	- `Kennedy Town: Smash'd Burger` -> `SMB852` -> `https://byob-hkbeer.co/promo/SMB852/`
-	- `KT HK Beer Co` -> `KTH852` -> `https://byob-hkbeer.co/promo/KTH852/`
-	- `Virtual` -> `VIR852` -> `https://byob-hkbeer.co/promo/VIR852/`
+	- `Central: Belly and the Beer` -> `BAB852` -> `https://byob-hkbeer.co/BAB852/`
+	- `Wan Chai: Hoppy Junction` -> `HJT852` -> `https://byob-hkbeer.co/HJT852/`
+	- `Prince Edward: HANDS` -> `HND852` -> `https://byob-hkbeer.co/HND852/`
+	- `Kennedy Town: Smash'd Burger` -> `SMB852` -> `https://byob-hkbeer.co/SMB852/`
+	- `KT HK Beer Co` -> `KTH852` -> `https://byob-hkbeer.co/KTH852/`
+	- `Virtual` -> `VIR852` -> `https://byob-hkbeer.co/VIR852/`
 - Invite body formatting:
 	- Paragraph-based template with blank lines.
 	- Separate copy variants for bar mode vs virtual mode.

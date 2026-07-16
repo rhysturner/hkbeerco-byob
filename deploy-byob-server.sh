@@ -37,7 +37,8 @@ WEB_ROOT="${WEB_ROOT:-/var/www/${DOMAIN}/html}"
 # Deployment payload
 SOURCE_FILE="${SOURCE_FILE:-byob-boss-invite.html}"
 TARGET_HTML="${TARGET_HTML:-index.html}"
-ASSET_DIRS="${ASSET_DIRS:-images fonts promo video}"
+ASSET_DIRS="${ASSET_DIRS:-images fonts promo video qr BAB852 HJT852 HND852 SMB852 KTH852 VIR852}"
+EXTRA_FILES="${EXTRA_FILES:-virtual-code.html}"
 REMOTE_FILE_CHMOD="${REMOTE_FILE_CHMOD:-644}"
 REMOTE_DIR_CHMOD="${REMOTE_DIR_CHMOD:-755}"
 
@@ -65,6 +66,19 @@ if [[ ! -f "$SOURCE_FILE" ]]; then
   echo "Source file not found: $SOURCE_FILE" >&2
   exit 1
 fi
+
+extra_files=()
+if [[ -n "$EXTRA_FILES" ]]; then
+  # shellcheck disable=SC2206
+  extra_files=($EXTRA_FILES)
+fi
+
+for file in "${extra_files[@]}"; do
+  if [[ ! -f "$file" ]]; then
+    echo "Extra file not found: $file" >&2
+    exit 1
+  fi
+done
 
 asset_dirs=()
 if [[ -n "$ASSET_DIRS" ]]; then
@@ -203,6 +217,9 @@ if [[ "$SKIP_UPLOAD" != "1" ]]; then
   trap cleanup EXIT
 
   cp "$SOURCE_FILE" "$stage_dir/$TARGET_HTML"
+  for file in "${extra_files[@]}"; do
+    cp "$file" "$stage_dir/$(basename "$file")"
+  done
   for dir in "${asset_dirs[@]}"; do
     cp -R "$dir" "$stage_dir/$dir"
   done

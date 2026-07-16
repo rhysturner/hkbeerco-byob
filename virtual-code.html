@@ -51,17 +51,74 @@
     margin-top: 10px;
     color: rgba(251,239,230,0.95);
   }
+  #intro {
+    white-space: pre-line;
+  }
 </style>
 </head>
 <body>
   <main class="card">
-    <h1>Generate Code</h1>
-    <p>Here's your QR code to redeem your two free Hong Kong Beers. Save this image.</p>
+    <h1 id="pageTitle">Here's your QR code</h1>
+    <p id="intro">Redeem your two free Hong Kong Beers. Save this image.</p>
     <img class="qr" src="images/qr/VIR852.png" alt="Virtual redemption QR code">
-    <p>Arrive at our brewery and collect two beers. One for you. One for your boss.</p>
-    <p>Address: Unit A, Ground Floor, Wang Kwong Industrial Building, 45 Hung To Rd, Kwun Tong</p>
-    <p>Opening Hours: Wednesday - Friday 4 to 6pm</p>
-    <p>Bring it to your boss and enjoy the World Cup final!</p>
+    <p id="stepOne">Arrive at our brewery and collect two beers. One for you. One for your boss.</p>
+    <p id="address">Address: Unit A, Ground Floor, Wang Kwong Industrial Building, 45 Hung To Rd, Kwun Tong</p>
+    <p id="hours">Redemption Period: 17 Jul, Friday 10am to 7pm</p>
+    <p id="closing">Bring them to your boss and enjoy the World Cup final!</p>
   </main>
+
+  <script>
+    (function(){
+      const copy = {
+        en: {
+          title: 'Here\'s your QR code',
+          intro: 'Redeem your two free Hong Kong Beers. Save this image.',
+          stepOne: 'Arrive at our brewery and collect two beers. One for you. One for your boss.',
+          address: 'Address: Unit A, Ground Floor, Wang Kwong Industrial Building, 45 Hung To Rd, Kwun Tong',
+          hours: 'Redemption Period: 17 Jul, Friday 10am to 7pm',
+          closing: 'Bring them to your boss and enjoy the World Cup final!'
+        },
+        cn: {
+          title: '以下係你嘅QR code',
+          intro: 'Save底佢，兌換你嘅兩枝免費Hong Kong Beer。',
+          stepOne: '前往我哋嘅門市，領取兩枝啤酒，一杯俾你，一杯俾你老闆。',
+          address: '地址：香港九龍觀塘鴻圖道45號宏光工業大廈地下A室',
+          hours: '兌換期：7 月 17 日（星期五）上午 10 時至下午 7 時',
+          closing: '帶啲啤酒俾你老闆，然後一齊欣賞世界盃決賽，盡情享受！'
+        }
+      };
+
+      function resolveLanguage(){
+        const params = new URLSearchParams(window.location.search);
+        const fromQuery = params.get('lang');
+        if(fromQuery === 'cn' || fromQuery === 'en'){
+          return fromQuery;
+        }
+
+        try {
+          const fromStorage = window.localStorage.getItem('byob_language');
+          if(fromStorage === 'cn' || fromStorage === 'en'){
+            return fromStorage;
+          }
+        } catch (err) {
+          // Ignore storage access issues and fall back to English.
+        }
+
+        return 'en';
+      }
+
+      const language = resolveLanguage();
+      const selectedCopy = copy[language];
+
+      document.documentElement.lang = language === 'cn' ? 'zh-HK' : 'en';
+      document.title = language === 'cn' ? 'BYOB 虛擬換領碼' : 'BYOB Virtual Code';
+      document.getElementById('pageTitle').textContent = selectedCopy.title;
+      document.getElementById('intro').textContent = selectedCopy.intro;
+      document.getElementById('stepOne').textContent = selectedCopy.stepOne;
+      document.getElementById('address').textContent = selectedCopy.address;
+      document.getElementById('hours').textContent = selectedCopy.hours;
+      document.getElementById('closing').textContent = selectedCopy.closing;
+    })();
+  </script>
 </body>
 </html>

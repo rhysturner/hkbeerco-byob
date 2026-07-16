@@ -12,7 +12,7 @@ if [[ -f "$ENV_FILE" ]]; then
 fi
 
 SOURCE_FILE="${SOURCE_FILE:-byob-boss-invite.html}"
-ASSET_DIRS="${ASSET_DIRS:-images fonts promo video}"
+ASSET_DIRS="${ASSET_DIRS:-images fonts promo video qr BAB852 HJT852 HND852 SMB852 KTH852 VIR852}"
 REMOTE_USER="${REMOTE_USER:-}"
 REMOTE_HOST="${REMOTE_HOST:-}"
 REMOTE_DIR="${REMOTE_DIR:-}"
