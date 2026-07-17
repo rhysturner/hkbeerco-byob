@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hong Kong Beer Co | BAB852 QR Page</title>
-<meta name="description" content="QR page for Central: Belly and the Beer.">
+<title>Hong Kong Beer Co | QR Page</title>
+<meta name="description" content="QR page for Hong Kong Beer Co promotion.">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-7L2BPER1X3"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -14,69 +14,201 @@
 </script>
 <style>
   *{box-sizing:border-box;margin:0;padding:0;}
-  body{
-    min-height:100vh;
-    display:grid;
-    place-items:center;
-    padding:24px;
-    background: radial-gradient(circle at top, #7f1915 0, #5c1712 36%, #2a0b09 100%);
-    color:#FBEFE6;
-    font-family:Avenir,'Avenir Next','Helvetica Neue',Helvetica,Arial,sans-serif;
-  }
-  main{
-    width:min(92vw,720px);
-    padding:clamp(22px,4vw,36px);
-    border:1px solid rgba(255,255,255,0.16);
-    background:rgba(0,0,0,0.22);
-    box-shadow:0 20px 56px rgba(0,0,0,0.28);
-    text-align:center;
-  }
-  .eyebrow{
-    font-size:12px;
-    letter-spacing:0.14em;
-    text-transform:uppercase;
-    color:rgba(251,239,230,0.72);
-  }
-  h1{
-    margin-top:10px;
-    font-size:clamp(30px,6vw,54px);
-    line-height:0.96;
-    text-transform:uppercase;
-    color:#ff2314;
-  }
-  .venue{
-    margin-top:12px;
-    font-size:16px;
-    line-height:1.5;
-    color:rgba(251,239,230,0.92);
-  }
-  .qr{
-    width:min(72vw,360px);
-    margin:24px auto 18px;
-    padding:16px;
-    background:#fff;
-  }
-  .qr img{
-    display:block;
-    width:100%;
-    height:auto;
-  }
-  .note{
-    font-size:14px;
-    line-height:1.55;
-    color:rgba(251,239,230,0.86);
-  }
+  body{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at top, #7f1915 0, #5c1712 36%, #2a0b09 100%);color:#FBEFE6;font-family:Avenir,'Avenir Next','Helvetica Neue',Helvetica,Arial,sans-serif;}
+  main{width:min(92vw,720px);padding:clamp(22px,4vw,36px);border:1px solid rgba(255,255,255,0.16);background:rgba(0,0,0,0.22);box-shadow:0 20px 56px rgba(0,0,0,0.28);text-align:center;}
+  .eyebrow{font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(251,239,230,0.72);}
+  h1{margin-top:10px;font-size:clamp(30px,6vw,54px);line-height:0.96;text-transform:uppercase;color:#ff2314;}
+  .venue{margin-top:12px;font-size:16px;line-height:1.5;color:rgba(251,239,230,0.92);}
+  .qr{width:min(72vw,360px);margin:24px auto 18px;padding:16px;background:#fff;}
+  .qr[hidden]{display:none;}
+  .qr img{display:block;width:100%;height:auto;}
+  .status{margin-top:10px;font-size:14px;line-height:1.5;color:rgba(251,239,230,0.9);}
+  .status.is-claimed{color:#33d764;}
+  .status.is-already{color:#ffb36a;}
+  .meta{margin-top:8px;font-size:12px;line-height:1.5;color:rgba(251,239,230,0.72);}
+  .action{margin-top:14px;}
+  .claim-btn{border:1px solid rgba(255,255,255,0.3);background:#d50001;color:#fff;min-height:46px;padding:10px 20px;font-size:16px;font-weight:700;letter-spacing:0.02em;cursor:pointer;}
+  .claim-btn[hidden], .action[hidden]{display:none;}
+  .claim-btn[disabled]{opacity:0.6;cursor:not-allowed;}
+  .note{margin-top:14px;font-size:14px;line-height:1.55;color:rgba(251,239,230,0.86);}
 </style>
 </head>
 <body>
-  <main>
+  <main data-code="" data-venue="">
     <p class="eyebrow">Hong Kong Beer Co</p>
-    <h1>Scan To Redeem</h1>
-    <p class="venue">Central: Belly and the Beer @bellyandthebeerhk</p>
-    <div class="qr">
-      <img src="../qr/BAB852.png" alt="QR code for Central: Belly and the Beer">
+    <h1 id="pageHeading">Scan To Redeem</h1>
+    <p class="venue" id="venueText">Loading venue...</p>
+    <div class="qr" id="qrWrap">
+      <img id="qrImage" src="" alt="Venue redemption QR code">
     </div>
-    <p class="note">Use this page to scan or share the redemption QR for the venue.</p>
+
+    <p class="status" id="claimStatus">Code valid. Ready to claim.</p>
+    <p class="meta" id="claimMeta"></p>
+
+    <div class="action" id="claimAction">
+      <button type="button" class="claim-btn" id="claimBtn">Claim</button>
+    </div>
+
+    <p class="note">Claim status is saved locally on this patron device/browser.</p>
   </main>
+
+  <script>
+  (function(){
+    const CLAIM_RECORD_KEY = 'byob_patron_claim_v1';
+    const CLAIM_MAX_AGE_SECONDS = 15552000;
+
+    const VENUE_BY_CODE = {
+      BAB852: 'Central: Belly and the Beer @bellyandthebeerhk',
+      HND852: 'Prince Edward: HANDS @handsbarhk',
+      HJT852: 'Wan Chai: Hoppy Junction @hoppyjunctiontap.hk',
+      SMB852: "Kennedy Town: Smash'd Burger @smashd.hk",
+      KTH852: 'KT HK Beer Co',
+      VIR852: 'Virtual redemption'
+    };
+
+    function resolveCodeFromPath(){
+      const matches = (window.location.pathname || '').toUpperCase().match(/[A-Z]{3}\d{3}/g);
+      if(matches && matches.length > 0){
+        return matches[matches.length - 1];
+      }
+      return 'VIR852';
+    }
+
+    const code = resolveCodeFromPath();
+    const venue = VENUE_BY_CODE[code] || 'Unknown venue';
+
+    const root = document.querySelector('main[data-code][data-venue]');
+    if(!root){
+      return;
+    }
+    root.setAttribute('data-code', code);
+    root.setAttribute('data-venue', venue);
+
+    const venueTextEl = document.getElementById('venueText');
+    const pageHeadingEl = document.getElementById('pageHeading');
+    const qrWrapEl = document.getElementById('qrWrap');
+    const qrImageEl = document.getElementById('qrImage');
+    venueTextEl.textContent = venue;
+    qrImageEl.src = '../qr/' + code + '.png';
+    qrImageEl.alt = 'QR code for ' + venue;
+    document.title = 'Hong Kong Beer Co | ' + code + ' QR Page';
+
+    const statusEl = document.getElementById('claimStatus');
+    const metaEl = document.getElementById('claimMeta');
+    const actionEl = document.getElementById('claimAction');
+    const claimBtn = document.getElementById('claimBtn');
+
+    function getCookie(name){
+      const key = name + '=';
+      const parts = document.cookie.split(';');
+      for(let i = 0; i < parts.length; i += 1){
+        const c = parts[i].trim();
+        if(c.indexOf(key) === 0){
+          return decodeURIComponent(c.slice(key.length));
+        }
+      }
+      return '';
+    }
+
+    function setCookie(name, value, maxAgeSeconds){
+      const attrs = [
+        name + '=' + encodeURIComponent(value),
+        'Max-Age=' + String(maxAgeSeconds),
+        'Path=/',
+        'SameSite=Lax'
+      ];
+      if(window.location.protocol === 'https:'){
+        attrs.push('Secure');
+      }
+      document.cookie = attrs.join('; ');
+    }
+
+    function parseClaimRecord(raw){
+      if(!raw){
+        return null;
+      }
+      try{
+        const parsed = JSON.parse(raw);
+        if(parsed && parsed.id && parsed.claimed === true){
+          return parsed;
+        }
+      } catch(_err){}
+      return null;
+    }
+
+    function readClaimRecord(){
+      try{
+        const local = parseClaimRecord(localStorage.getItem(CLAIM_RECORD_KEY));
+        if(local){
+          return local;
+        }
+      } catch(_err){}
+
+      const cookieRaw = getCookie(CLAIM_RECORD_KEY);
+      return parseClaimRecord(cookieRaw);
+    }
+
+    function writeClaimRecord(record){
+      const value = JSON.stringify(record);
+      try{
+        localStorage.setItem(CLAIM_RECORD_KEY, value);
+      } catch(_err){}
+      setCookie(CLAIM_RECORD_KEY, value, CLAIM_MAX_AGE_SECONDS);
+    }
+
+    function newClaimId(){
+      if(window.crypto && typeof window.crypto.randomUUID === 'function'){
+        return window.crypto.randomUUID();
+      }
+      return 'claim-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
+    }
+
+    function formatClaimedAt(value){
+      const d = new Date(value);
+      if(Number.isNaN(d.getTime())){
+        return value || 'Unknown';
+      }
+      return d.toLocaleString();
+    }
+
+    function setClaimedUI(record, already){
+      pageHeadingEl.textContent = 'Already Claimed';
+      qrWrapEl.hidden = true;
+      statusEl.textContent = already ? 'Already claimed on this device/browser.' : 'Claim recorded.';
+      statusEl.classList.remove('is-claimed', 'is-already');
+      statusEl.classList.add(already ? 'is-already' : 'is-claimed');
+      metaEl.textContent = 'Claim ID: ' + record.id + ' | Claimed at: ' + formatClaimedAt(record.claimedAt) + ' | Claimed at venue: ' + (record.claimedVenue || venue);
+      actionEl.hidden = true;
+      claimBtn.hidden = true;
+    }
+
+    const existing = readClaimRecord();
+    if(existing && existing.claimed === true){
+      setClaimedUI(existing, true);
+      return;
+    }
+
+    statusEl.textContent = 'Code valid. Ready to claim.';
+    pageHeadingEl.textContent = 'Scan To Redeem';
+    qrWrapEl.hidden = false;
+    statusEl.classList.remove('is-claimed', 'is-already');
+    metaEl.textContent = 'Venue: ' + venue + ' | Code: ' + code;
+    actionEl.hidden = false;
+    claimBtn.hidden = false;
+
+    claimBtn.addEventListener('click', function(){
+      claimBtn.disabled = true;
+      const record = {
+        id: newClaimId(),
+        claimed: true,
+        claimedAt: new Date().toISOString(),
+        claimedCode: code,
+        claimedVenue: venue
+      };
+      writeClaimRecord(record);
+      setClaimedUI(record, false);
+    });
+  })();
+  </script>
 </body>
 </html>
