@@ -45,6 +45,46 @@
     background: #fff;
     display: block;
   }
+  .qr[hidden] {
+    display: none;
+  }
+  .status {
+    margin-top: 10px;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  .status.is-claimed {
+    color: #33d764;
+  }
+  .status.is-already {
+    color: #ffb36a;
+  }
+  .meta {
+    font-size: 13px;
+    line-height: 1.5;
+    color: rgba(251,239,230,0.78);
+  }
+  .action {
+    margin-top: 14px;
+  }
+  .claim-btn {
+    border: 1px solid rgba(255,255,255,0.3);
+    background: #d50001;
+    color: #fff;
+    min-height: 44px;
+    padding: 10px 18px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+  }
+  .claim-btn[hidden], .action[hidden] {
+    display: none;
+  }
+  .claim-btn[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
   p {
     font-size: 15px;
     line-height: 1.5;
@@ -60,19 +100,40 @@
   <main class="card">
     <h1 id="pageTitle">Here's your QR code</h1>
     <p id="intro">Redeem your two free Hong Kong Beers. Save this image.</p>
-    <img class="qr" src="images/qr/VIR852.png" alt="Virtual redemption QR code">
+    <img class="qr" id="qrImage" src="images/qr/VIR852.png" alt="Virtual redemption QR code">
+
+    <p class="status" id="claimStatus"></p>
+    <p class="meta" id="claimMeta"></p>
+
+    <div class="action" id="claimAction">
+      <button type="button" class="claim-btn" id="claimBtn">Claim</button>
+    </div>
+
     <p id="stepOne">Arrive at our brewery and collect two beers. One for you. One for your boss.</p>
     <p id="address">Address: Unit A, Ground Floor, Wang Kwong Industrial Building, 45 Hung To Rd, Kwun Tong</p>
     <p id="hours">Redemption Period: 17 Jul, Friday 10am to 7pm</p>
     <p id="closing">Bring them to your boss and enjoy the World Cup final!</p>
+    <p id="claimNote">Claim status is saved locally on this patron device/browser.</p>
   </main>
 
   <script>
     (function(){
+      const CLAIM_RECORD_KEY = 'byob_patron_claim_v1';
+      const CLAIM_MAX_AGE_SECONDS = 15552000;
+      const VIRTUAL_CODE = 'VIR852';
+      const VIRTUAL_VENUE = 'Virtual redemption';
+
       const copy = {
         en: {
           title: 'Here\'s your QR code',
+          claimedTitle: 'Already claimed',
           intro: 'Redeem your two free Hong Kong Beers. Save this image.',
+          claimButton: 'Claim',
+          claimNote: 'Claim status is saved locally on this patron device/browser.',
+          readyStatus: 'Code valid. Ready to claim.',
+          alreadyStatus: 'Already claimed on this device/browser.',
+          recordedStatus: 'Claim recorded.',
+          metaReady: 'Code: VIR852 | Venue: Virtual redemption',
           stepOne: 'Arrive at our brewery and collect two beers. One for you. One for your boss.',
           address: 'Address: Unit A, Ground Floor, Wang Kwong Industrial Building, 45 Hung To Rd, Kwun Tong',
           hours: 'Redemption Period: 17 Jul, Friday 10am to 7pm',
@@ -80,7 +141,14 @@
         },
         cn: {
           title: '以下係你嘅QR code',
+          claimedTitle: '已兌換',
           intro: 'Save底佢，兌換你嘅兩枝免費Hong Kong Beer。',
+          claimButton: '兌換',
+          claimNote: '兌換狀態會儲存在此裝置/瀏覽器。',
+          readyStatus: 'Code有效，可以兌換。',
+          alreadyStatus: '此裝置/瀏覽器已兌換。',
+          recordedStatus: '兌換已記錄。',
+          metaReady: 'Code: VIR852 | 場地: Virtual redemption',
           stepOne: '前往我哋嘅門市，領取兩枝啤酒，一杯俾你，一杯俾你老闆。',
           address: '地址：香港九龍觀塘鴻圖道45號宏光工業大廈地下A室',
           hours: '兌換期：7 月 17 日（星期五）上午 10 時至下午 7 時',
@@ -110,14 +178,140 @@
       const language = resolveLanguage();
       const selectedCopy = copy[language];
 
+      const pageTitleEl = document.getElementById('pageTitle');
+      const introEl = document.getElementById('intro');
+      const stepOneEl = document.getElementById('stepOne');
+      const addressEl = document.getElementById('address');
+      const hoursEl = document.getElementById('hours');
+      const closingEl = document.getElementById('closing');
+      const qrImageEl = document.getElementById('qrImage');
+      const claimStatusEl = document.getElementById('claimStatus');
+      const claimMetaEl = document.getElementById('claimMeta');
+      const claimActionEl = document.getElementById('claimAction');
+      const claimBtnEl = document.getElementById('claimBtn');
+      const claimNoteEl = document.getElementById('claimNote');
+
+      function getCookie(name){
+        const key = name + '=';
+        const parts = document.cookie.split(';');
+        for(let i = 0; i < parts.length; i += 1){
+          const c = parts[i].trim();
+          if(c.indexOf(key) === 0){
+            return decodeURIComponent(c.slice(key.length));
+          }
+        }
+        return '';
+      }
+
+      function setCookie(name, value, maxAgeSeconds){
+        const attrs = [
+          name + '=' + encodeURIComponent(value),
+          'Max-Age=' + String(maxAgeSeconds),
+          'Path=/',
+          'SameSite=Lax'
+        ];
+        if(window.location.protocol === 'https:'){
+          attrs.push('Secure');
+        }
+        document.cookie = attrs.join('; ');
+      }
+
+      function parseClaimRecord(raw){
+        if(!raw){
+          return null;
+        }
+        try{
+          const parsed = JSON.parse(raw);
+          if(parsed && parsed.id && parsed.claimed === true){
+            return parsed;
+          }
+        } catch(_err){}
+        return null;
+      }
+
+      function readClaimRecord(){
+        try{
+          const local = parseClaimRecord(localStorage.getItem(CLAIM_RECORD_KEY));
+          if(local){
+            return local;
+          }
+        } catch(_err){}
+
+        const cookieRaw = getCookie(CLAIM_RECORD_KEY);
+        return parseClaimRecord(cookieRaw);
+      }
+
+      function writeClaimRecord(record){
+        const value = JSON.stringify(record);
+        try{
+          localStorage.setItem(CLAIM_RECORD_KEY, value);
+        } catch(_err){}
+        setCookie(CLAIM_RECORD_KEY, value, CLAIM_MAX_AGE_SECONDS);
+      }
+
+      function newClaimId(){
+        if(window.crypto && typeof window.crypto.randomUUID === 'function'){
+          return window.crypto.randomUUID();
+        }
+        return 'claim-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
+      }
+
+      function formatClaimedAt(value){
+        const d = new Date(value);
+        if(Number.isNaN(d.getTime())){
+          return value || 'Unknown';
+        }
+        return d.toLocaleString();
+      }
+
+      function setClaimedUI(record, already){
+        pageTitleEl.textContent = selectedCopy.claimedTitle;
+        qrImageEl.hidden = true;
+        claimStatusEl.textContent = already ? selectedCopy.alreadyStatus : selectedCopy.recordedStatus;
+        claimStatusEl.classList.remove('is-claimed', 'is-already');
+        claimStatusEl.classList.add(already ? 'is-already' : 'is-claimed');
+        claimMetaEl.textContent = 'Claim ID: ' + record.id + ' | Claimed at: ' + formatClaimedAt(record.claimedAt) + ' | Claimed at venue: ' + (record.claimedVenue || VIRTUAL_VENUE);
+        claimActionEl.hidden = true;
+        claimBtnEl.hidden = true;
+      }
+
       document.documentElement.lang = language === 'cn' ? 'zh-HK' : 'en';
       document.title = language === 'cn' ? 'BYOB 虛擬換領碼' : 'BYOB Virtual Code';
-      document.getElementById('pageTitle').textContent = selectedCopy.title;
-      document.getElementById('intro').textContent = selectedCopy.intro;
-      document.getElementById('stepOne').textContent = selectedCopy.stepOne;
-      document.getElementById('address').textContent = selectedCopy.address;
-      document.getElementById('hours').textContent = selectedCopy.hours;
-      document.getElementById('closing').textContent = selectedCopy.closing;
+      pageTitleEl.textContent = selectedCopy.title;
+      introEl.textContent = selectedCopy.intro;
+      stepOneEl.textContent = selectedCopy.stepOne;
+      addressEl.textContent = selectedCopy.address;
+      hoursEl.textContent = selectedCopy.hours;
+      closingEl.textContent = selectedCopy.closing;
+      claimBtnEl.textContent = selectedCopy.claimButton;
+      claimNoteEl.textContent = selectedCopy.claimNote;
+
+      const existing = readClaimRecord();
+      if(existing && existing.claimed === true){
+        setClaimedUI(existing, true);
+        return;
+      }
+
+      pageTitleEl.textContent = selectedCopy.title;
+      qrImageEl.hidden = false;
+      claimStatusEl.textContent = selectedCopy.readyStatus;
+      claimStatusEl.classList.remove('is-claimed', 'is-already');
+      claimMetaEl.textContent = selectedCopy.metaReady;
+      claimActionEl.hidden = false;
+      claimBtnEl.hidden = false;
+
+      claimBtnEl.addEventListener('click', function(){
+        claimBtnEl.disabled = true;
+        const record = {
+          id: newClaimId(),
+          claimed: true,
+          claimedAt: new Date().toISOString(),
+          claimedCode: VIRTUAL_CODE,
+          claimedVenue: VIRTUAL_VENUE
+        };
+        writeClaimRecord(record);
+        setClaimedUI(record, false);
+      });
     })();
   </script>
 </body>
