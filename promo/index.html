@@ -108,6 +108,26 @@
     line-height:1.45;
     color:rgba(251,239,230,0.78);
   }
+  .action{
+    margin-top:16px;
+    display:none;
+    justify-content:center;
+  }
+  .redeem-btn{
+    border:1px solid rgba(255,255,255,0.3);
+    background:#d50001;
+    color:#fff;
+    min-height:46px;
+    padding:10px 20px;
+    font-size:16px;
+    font-weight:700;
+    letter-spacing:0.02em;
+    cursor:pointer;
+  }
+  .redeem-btn[disabled]{
+    opacity:0.6;
+    cursor:not-allowed;
+  }
 </style>
 </head>
 <body>
@@ -126,6 +146,9 @@
       </div>
     </div>
     <p class="copy" id="copyText"></p>
+    <div class="action" id="actionWrap">
+      <button type="button" class="redeem-btn" id="redeemBtn">Claim</button>
+    </div>
     <p class="footer">Hong Kong Beer Co · Promo Access Verified</p>
   </main>
 
@@ -139,6 +162,8 @@
       KTH852: 'KT HK Beer Co',
       VIR852: 'Virtual'
     };
+    const CLAIM_RECORD_KEY = 'byob_patron_claim_v1';
+    const CLAIM_MAX_AGE_SECONDS = 15552000; // 180 days
 
     function codeFromLocation(){
       const byQuery = new URLSearchParams(window.location.search).get('code');
@@ -155,16 +180,128 @@
       return '';
     }
 
+    function getCookie(name){
+      const key = name + '=';
+      const parts = document.cookie.split(';');
+      for(let i = 0; i < parts.length; i += 1){
+        const c = parts[i].trim();
+        if(c.indexOf(key) === 0){
+          return decodeURIComponent(c.slice(key.length));
+        }
+      }
+      return '';
+    }
+
+    function setCookie(name, value, maxAgeSeconds){
+      const attrs = [
+        name + '=' + encodeURIComponent(value),
+        'Max-Age=' + String(maxAgeSeconds),
+        'Path=/',
+        'SameSite=Lax'
+      ];
+      if(window.location.protocol === 'https:'){
+        attrs.push('Secure');
+      }
+      document.cookie = attrs.join('; ');
+    }
+
+    function parseClaimRecord(raw){
+      if(!raw){
+        return null;
+      }
+      try{
+        const parsed = JSON.parse(raw);
+        if(parsed && parsed.id && parsed.claimed === true){
+          return parsed;
+        }
+      } catch(_err){}
+      return null;
+    }
+
+    function readClaimRecord(){
+      try{
+        const local = parseClaimRecord(localStorage.getItem(CLAIM_RECORD_KEY));
+        if(local){
+          return local;
+        }
+      } catch(_err){}
+
+      const cookieRaw = getCookie(CLAIM_RECORD_KEY);
+      return parseClaimRecord(cookieRaw);
+    }
+
+    function writeClaimRecord(record){
+      const value = JSON.stringify(record);
+      try{
+        localStorage.setItem(CLAIM_RECORD_KEY, value);
+      } catch(_err){}
+      setCookie(CLAIM_RECORD_KEY, value, CLAIM_MAX_AGE_SECONDS);
+    }
+
+    function newClaimId(){
+      if(window.crypto && typeof window.crypto.randomUUID === 'function'){
+        return window.crypto.randomUUID();
+      }
+      return 'claim-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
+    }
+
+    function formatClaimedAt(value){
+      const d = new Date(value);
+      if(Number.isNaN(d.getTime())){
+        return value || 'Unknown';
+      }
+      return d.toLocaleString();
+    }
+
     const statusText = document.getElementById('statusText');
     const statusMark = document.getElementById('statusMark');
     const copyText = document.getElementById('copyText');
     const meta = document.getElementById('meta');
     const promoCodeValue = document.getElementById('promoCodeValue');
     const promoVenueValue = document.getElementById('promoVenueValue');
+    const actionWrap = document.getElementById('actionWrap');
+    const redeemBtn = document.getElementById('redeemBtn');
+
+    function showInvalid(message, detail){
+      statusMark.className = 'status-mark show invalid';
+      statusMark.textContent = '✕';
+      statusText.textContent = message;
+      promoVenueValue.textContent = 'Not found';
+      copyText.textContent = detail;
+      actionWrap.style.display = 'none';
+    }
+
+    function showReady(venue){
+      statusMark.className = 'status-mark show valid';
+      statusMark.textContent = '•';
+      statusText.textContent = 'Code valid. Ready to claim.';
+      promoVenueValue.textContent = venue;
+      copyText.textContent = 'Press Claim to mark this patron as redeemed.';
+      actionWrap.style.display = 'flex';
+      redeemBtn.disabled = false;
+    }
+
+    function showAlreadyClaimed(venue, record){
+      statusMark.className = 'status-mark show valid';
+      statusMark.textContent = '✓';
+      statusText.textContent = 'Already claimed.';
+      promoVenueValue.textContent = venue;
+      copyText.textContent = 'Claim ID: ' + record.id + ' | Claimed at: ' + formatClaimedAt(record.claimedAt) + '.';
+      actionWrap.style.display = 'none';
+    }
+
+    function showClaimedNow(venue, record){
+      statusMark.className = 'status-mark show valid';
+      statusMark.textContent = '✓';
+      statusText.textContent = 'Claim recorded.';
+      promoVenueValue.textContent = venue;
+      copyText.textContent = 'Claim ID: ' + record.id + ' | Claimed at: ' + formatClaimedAt(record.claimedAt) + '.';
+      actionWrap.style.display = 'none';
+    }
 
     const code = codeFromLocation();
     if(!code){
-      copyText.textContent = '';
+      showInvalid('Promo code not recognised.', 'Please check the QR/code and try again, or ask HK Beer staff for help.');
       return;
     }
 
@@ -172,19 +309,30 @@
     promoCodeValue.textContent = code;
 
     const venue = PROMO_TO_VENUE[code] || '';
-    if(venue){
-      statusMark.className = 'status-mark show valid';
-      statusMark.textContent = '✓';
-      statusText.textContent = 'Thank you! Beer redeemed.';
-      promoVenueValue.textContent = venue;
-      copyText.textContent = 'Your redemption has been recorded for this promo. Please enjoy responsibly.';
-    } else {
-      statusMark.className = 'status-mark show invalid';
-      statusMark.textContent = '✕';
-      statusText.textContent = 'Promo code not recognised.';
-      promoVenueValue.textContent = 'Not found';
-      copyText.textContent = 'Please check the QR/code and try again, or ask HK Beer staff for help.';
+    if(!venue){
+      showInvalid('Promo code not recognised.', 'Please check the QR/code and try again, or ask HK Beer staff for help.');
+      return;
     }
+
+    const existingClaim = readClaimRecord();
+    if(existingClaim && existingClaim.claimed === true){
+      showAlreadyClaimed(venue, existingClaim);
+      return;
+    }
+
+    showReady(venue);
+    redeemBtn.addEventListener('click', function(){
+      redeemBtn.disabled = true;
+      const record = {
+        id: newClaimId(),
+        claimed: true,
+        claimedAt: new Date().toISOString(),
+        claimedCode: code,
+        claimedVenue: venue
+      };
+      writeClaimRecord(record);
+      showClaimedNow(venue, record);
+    });
   })();
   </script>
 </body>

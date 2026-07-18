@@ -13,6 +13,7 @@ fi
 
 SOURCE_FILE="${SOURCE_FILE:-byob-boss-invite.html}"
 ASSET_DIRS="${ASSET_DIRS:-images fonts promo video qr BAB852 HJT852 HND852 SMB852 KTH852 VIR852}"
+EXTRA_FILES="${EXTRA_FILES:-virtual-code.html}"
 REMOTE_USER="${REMOTE_USER:-}"
 REMOTE_HOST="${REMOTE_HOST:-}"
 REMOTE_DIR="${REMOTE_DIR:-}"
@@ -53,9 +54,22 @@ if [[ -n "$ASSET_DIRS" ]]; then
   asset_dirs=($ASSET_DIRS)
 fi
 
+extra_files=()
+if [[ -n "$EXTRA_FILES" ]]; then
+  # shellcheck disable=SC2206
+  extra_files=($EXTRA_FILES)
+fi
+
 for dir in "${asset_dirs[@]}"; do
   if [[ ! -d "$dir" ]]; then
     echo "Asset directory not found: $dir" >&2
+    exit 1
+  fi
+done
+
+for file in "${extra_files[@]}"; do
+  if [[ ! -f "$file" ]]; then
+    echo "Extra file not found: $file" >&2
     exit 1
   fi
 done
@@ -72,7 +86,9 @@ Set these values in $ENV_FILE or export them before running:
 Optional variables:
   SOURCE_FILE   File to upload (default: byob-boss-invite.html)
   ASSET_DIRS    Space-separated directories to upload recursively
-                (default: "images fonts promo")
+                (default: "images fonts promo video qr BAB852 HJT852 HND852 SMB852 KTH852 VIR852")
+  EXTRA_FILES   Space-separated root files to upload
+                (default: "virtual-code.html")
   REMOTE_NAME   Filename to use on the server (default: same as SOURCE_FILE)
   SSH_PORT      SSH port (default: 22)
   SSH_KEY       Path to a private key file
@@ -178,11 +194,24 @@ if [[ ${#asset_dirs[@]} -gt 0 ]]; then
   done
 fi
 
+if [[ ${#extra_files[@]} -gt 0 ]]; then
+  echo "Uploading extra files: ${extra_files[*]}"
+  for file in "${extra_files[@]}"; do
+    scp "${scp_args[@]}" "$file" "$REMOTE_USER@$REMOTE_HOST:$REMOTE_DIR/"
+  done
+fi
+
 chmod_cmd="chmod '$REMOTE_FILE_CHMOD' '$REMOTE_DIR/$REMOTE_NAME'"
 if [[ ${#asset_dirs[@]} -gt 0 ]]; then
   for dir in "${asset_dirs[@]}"; do
     chmod_cmd+=" && find '$REMOTE_DIR/$dir' -type d -exec chmod '$REMOTE_DIR_CHMOD' {} +"
     chmod_cmd+=" && find '$REMOTE_DIR/$dir' -type f -exec chmod '$REMOTE_FILE_CHMOD' {} +"
+  done
+fi
+
+if [[ ${#extra_files[@]} -gt 0 ]]; then
+  for file in "${extra_files[@]}"; do
+    chmod_cmd+=" && chmod '$REMOTE_FILE_CHMOD' '$REMOTE_DIR/$file'"
   done
 fi
 
