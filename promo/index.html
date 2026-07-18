@@ -148,8 +148,12 @@
 
       const parts = window.location.pathname.split('/').filter(Boolean);
       const promoIdx = parts.lastIndexOf('promo');
-      if(promoIdx >= 0 && parts[promoIdx + 1]){
-        return decodeURIComponent(parts[promoIdx + 1]).trim().toUpperCase();
+      const candidate = parts[promoIdx + 1];
+      if(promoIdx >= 0 && candidate){
+        const normalized = decodeURIComponent(candidate).trim().toUpperCase();
+        if(normalized !== 'INDEX.HTML'){
+          return normalized;
+        }
       }
 
       return '';
