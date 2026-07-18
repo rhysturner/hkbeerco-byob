@@ -132,7 +132,7 @@
 </head>
 <body>
   <main class="card" id="card" aria-live="polite">
-    <img class="header-art" src="/images/BYOB_Microsite_header_1.png" alt="Hong Kong Beer BYOB header">
+    <img class="header-art" id="headerArt" src="" alt="Hong Kong Beer BYOB header">
     <div class="status-mark" id="statusMark" aria-hidden="true"></div>
     <h1 id="statusText">Welcome you are logged in</h1>
     <div class="meta" id="meta">
@@ -146,9 +146,6 @@
       </div>
     </div>
     <p class="copy" id="copyText"></p>
-    <div class="action" id="actionWrap">
-      <button type="button" class="redeem-btn" id="redeemBtn">Claim</button>
-    </div>
     <p class="footer">Hong Kong Beer Co · Promo Access Verified</p>
   </main>
 
@@ -162,105 +159,60 @@
       KTH852: 'KT HK Beer Co',
       VIR852: 'Virtual'
     };
-    const CLAIM_RECORD_KEY = 'byob_patron_claim_v1';
-    const CLAIM_MAX_AGE_SECONDS = 15552000; // 180 days
+    function normalizePromoCode(value){
+      if(!value){
+        return '';
+      }
+      const normalized = String(value).trim().toUpperCase();
+      if(/^[A-Z]{3}\d{3}$/.test(normalized)){
+        return normalized;
+      }
+      return '';
+    }
+
+    function appBasePrefix(){
+      const path = window.location.pathname || '';
+      const marker = '/promo';
+      const idx = path.toLowerCase().indexOf(marker);
+      if(idx < 0){
+        return '';
+      }
+      return path.slice(0, idx);
+    }
+
+    function assetPath(pathFromRoot){
+      return appBasePrefix() + pathFromRoot;
+    }
 
     function codeFromLocation(){
       const byQuery = new URLSearchParams(window.location.search).get('code');
-      if(byQuery){
-        return byQuery.trim().toUpperCase();
+      const queryCode = normalizePromoCode(byQuery);
+      if(queryCode){
+        return queryCode;
       }
 
       const parts = window.location.pathname.split('/').filter(Boolean);
       const promoIdx = parts.lastIndexOf('promo');
-      if(promoIdx >= 0 && parts[promoIdx + 1]){
-        return decodeURIComponent(parts[promoIdx + 1]).trim().toUpperCase();
+      const candidate = parts[promoIdx + 1];
+      if(promoIdx >= 0 && candidate){
+        const normalized = decodeURIComponent(candidate).trim().toUpperCase();
+        if(normalized !== 'INDEX.HTML'){
+          return normalizePromoCode(normalized);
+        }
       }
 
       return '';
     }
 
-    function getCookie(name){
-      const key = name + '=';
-      const parts = document.cookie.split(';');
-      for(let i = 0; i < parts.length; i += 1){
-        const c = parts[i].trim();
-        if(c.indexOf(key) === 0){
-          return decodeURIComponent(c.slice(key.length));
-        }
-      }
-      return '';
-    }
-
-    function setCookie(name, value, maxAgeSeconds){
-      const attrs = [
-        name + '=' + encodeURIComponent(value),
-        'Max-Age=' + String(maxAgeSeconds),
-        'Path=/',
-        'SameSite=Lax'
-      ];
-      if(window.location.protocol === 'https:'){
-        attrs.push('Secure');
-      }
-      document.cookie = attrs.join('; ');
-    }
-
-    function parseClaimRecord(raw){
-      if(!raw){
-        return null;
-      }
-      try{
-        const parsed = JSON.parse(raw);
-        if(parsed && parsed.id && parsed.claimed === true){
-          return parsed;
-        }
-      } catch(_err){}
-      return null;
-    }
-
-    function readClaimRecord(){
-      try{
-        const local = parseClaimRecord(localStorage.getItem(CLAIM_RECORD_KEY));
-        if(local){
-          return local;
-        }
-      } catch(_err){}
-
-      const cookieRaw = getCookie(CLAIM_RECORD_KEY);
-      return parseClaimRecord(cookieRaw);
-    }
-
-    function writeClaimRecord(record){
-      const value = JSON.stringify(record);
-      try{
-        localStorage.setItem(CLAIM_RECORD_KEY, value);
-      } catch(_err){}
-      setCookie(CLAIM_RECORD_KEY, value, CLAIM_MAX_AGE_SECONDS);
-    }
-
-    function newClaimId(){
-      if(window.crypto && typeof window.crypto.randomUUID === 'function'){
-        return window.crypto.randomUUID();
-      }
-      return 'claim-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
-    }
-
-    function formatClaimedAt(value){
-      const d = new Date(value);
-      if(Number.isNaN(d.getTime())){
-        return value || 'Unknown';
-      }
-      return d.toLocaleString();
-    }
-
+    const headerArt = document.getElementById('headerArt');
     const statusText = document.getElementById('statusText');
     const statusMark = document.getElementById('statusMark');
     const copyText = document.getElementById('copyText');
     const meta = document.getElementById('meta');
     const promoCodeValue = document.getElementById('promoCodeValue');
     const promoVenueValue = document.getElementById('promoVenueValue');
-    const actionWrap = document.getElementById('actionWrap');
-    const redeemBtn = document.getElementById('redeemBtn');
+
+    headerArt.src = assetPath('/images/BYOB_Microsite_header_1.png');
 
     function showInvalid(message, detail){
       statusMark.className = 'status-mark show invalid';
@@ -268,40 +220,27 @@
       statusText.textContent = message;
       promoVenueValue.textContent = 'Not found';
       copyText.textContent = detail;
-      actionWrap.style.display = 'none';
+    }
+
+    function showLoggedIn(){
+      statusMark.className = 'status-mark show valid';
+      statusMark.textContent = '✓';
+      statusText.textContent = 'Welcome you are logged in';
+      copyText.textContent = 'Promo access verified.';
+      meta.style.display = 'none';
     }
 
     function showReady(venue){
       statusMark.className = 'status-mark show valid';
       statusMark.textContent = '•';
-      statusText.textContent = 'Code valid. Ready to claim.';
+      statusText.textContent = 'Code valid. Logged in.';
       promoVenueValue.textContent = venue;
-      copyText.textContent = 'Press Claim to mark this patron as redeemed.';
-      actionWrap.style.display = 'flex';
-      redeemBtn.disabled = false;
-    }
-
-    function showAlreadyClaimed(venue, record){
-      statusMark.className = 'status-mark show valid';
-      statusMark.textContent = '✓';
-      statusText.textContent = 'Already claimed.';
-      promoVenueValue.textContent = venue;
-      copyText.textContent = 'Claim ID: ' + record.id + ' | Claimed at: ' + formatClaimedAt(record.claimedAt) + '.';
-      actionWrap.style.display = 'none';
-    }
-
-    function showClaimedNow(venue, record){
-      statusMark.className = 'status-mark show valid';
-      statusMark.textContent = '✓';
-      statusText.textContent = 'Claim recorded.';
-      promoVenueValue.textContent = venue;
-      copyText.textContent = 'Claim ID: ' + record.id + ' | Claimed at: ' + formatClaimedAt(record.claimedAt) + '.';
-      actionWrap.style.display = 'none';
+      copyText.textContent = 'Promo validation successful.';
     }
 
     const code = codeFromLocation();
     if(!code){
-      showInvalid('Promo code not recognised.', 'Please check the QR/code and try again, or ask HK Beer staff for help.');
+      showLoggedIn();
       return;
     }
 
@@ -314,25 +253,7 @@
       return;
     }
 
-    const existingClaim = readClaimRecord();
-    if(existingClaim && existingClaim.claimed === true){
-      showAlreadyClaimed(venue, existingClaim);
-      return;
-    }
-
     showReady(venue);
-    redeemBtn.addEventListener('click', function(){
-      redeemBtn.disabled = true;
-      const record = {
-        id: newClaimId(),
-        claimed: true,
-        claimedAt: new Date().toISOString(),
-        claimedCode: code,
-        claimedVenue: venue
-      };
-      writeClaimRecord(record);
-      showClaimedNow(venue, record);
-    });
   })();
   </script>
 </body>

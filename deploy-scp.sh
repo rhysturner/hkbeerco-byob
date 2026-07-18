@@ -40,7 +40,7 @@ PROMO_ROUTE_STRICT="${PROMO_ROUTE_STRICT:-0}"
 VERIFY_PROMO_ROUTE="${VERIFY_PROMO_ROUTE:-1}"
 VERIFY_PROMO_BASE_URL="${VERIFY_PROMO_BASE_URL:-https://brrrr.app/hkbeerco/byob/promo}"
 VERIFY_PROMO_CODE="${VERIFY_PROMO_CODE:-BAB852}"
-VERIFY_PROMO_EXPECT="${VERIFY_PROMO_EXPECT:-Thank you! Beer redeemed.}"
+VERIFY_PROMO_EXPECT="${VERIFY_PROMO_EXPECT:-Promo validation successful.}"
 VERIFY_PROMO_STRICT="${VERIFY_PROMO_STRICT:-0}"
 
 if [[ ! -f "$SOURCE_FILE" ]]; then
@@ -117,7 +117,7 @@ Optional variables:
                          (default: https://brrrr.app/hkbeerco/byob/promo)
   VERIFY_PROMO_CODE  Promo code used for verification (default: BAB852)
   VERIFY_PROMO_EXPECT  Text expected in promo landing response
-                       (default: "Thank you! Beer redeemed.")
+                       (default: "Promo validation successful.")
   VERIFY_PROMO_STRICT  Fail deploy if verification fails (default: 0)
   REMOTE_CHMOD       Legacy alias for REMOTE_FILE_CHMOD
   ENV_FILE      Alternate env file to source before deploy
